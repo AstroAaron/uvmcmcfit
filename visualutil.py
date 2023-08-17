@@ -165,7 +165,7 @@ def plotPDF(fitresults, tag, limits='', Ngood=5000, axes='auto'):
     avg_dic = dict.fromkeys(pnames)
 
     for i, pname in enumerate(pnames):
-        ax = plt.subplot(nrow, ncol, i+1)     # nparams/ncol
+        ax = plt.subplot(nrow, ncol, i+1, )     # nparams/ncol
 
         frg = fitresultsgood[pname]
         rmsval = numpy.std(frg)
@@ -206,8 +206,8 @@ def plotPDF(fitresults, tag, limits='', Ngood=5000, axes='auto'):
             print('*** This is likely a fixed parameter: {}. ***').format(pname)
             print('*** Check config.yaml *** ')
 
-    savefile = tag + 'PDFs.png'
-    savefig(savefile)
+    savefile = tag + 'PDFs.pdf'
+    savefig(savefile, format='pdf')
     return avg_dic
 
 
@@ -642,7 +642,7 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=''):
 
     else:
         # use CASA for imaging
-        from clean import clean
+        from casa import tclean
         from casa import exportfits
 
         # ---------------------------------------
@@ -682,9 +682,9 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=''):
         # use CASA's clean task to make the images
         print("")
         print("*** CLEANING with the following options: *** \n")
-        print("vis={:s}, imagename={:s}, mode='mfs', niters=10000, threshold={:s} mJy, interactive={:}, mask={:s}, imsize={:s},cell={:s},weighting='briggs',robust=0.5").format(modelvisloc, imloc+'.image', threshold,  interactive, mask, imsize, cell)
+        print("vis={:s}, imagename={:s}, specmode='mfs', niters=10000, threshold={:s} mJy, interactive={:}, mask={:s}, imsize={:s},cell={:s},weighting='briggs',robust=0.5").format(modelvisloc, imloc+'.image', threshold,  interactive, mask, imsize, cell)
 
-        clean(vis=modelvisloc, imagename=imloc, mode='mfs', niter=10000,
+        tclean(vis=modelvisloc, imagename=imloc, specmode='mfs', niter=10000,
             threshold=threshold+'mJy', interactive=interactive, mask=mask,
             imsize=imsize, cell=cell, weighting='briggs', robust=0.5)
 
@@ -713,7 +713,7 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=''):
             modelvisloc = visname + '_residual_' + idtag + '.ms'
 
         # use CASA's clean task to make the images
-        clean(vis=modelvisloc, imagename=imloc, mode='mfs', niter=10000,
+        tclean(vis=modelvisloc, imagename=imloc, specmode='mfs', niter=10000,
             threshold=threshold+'mJy', interactive=interactive, mask=mask,
             imsize=imsize, cell=cell, weighting='briggs', robust=0.5)
 
@@ -750,7 +750,7 @@ def plotImage(model, data, config, modeltype, fitresult, tag=''):
     matplotlib.rcParams['axes.linewidth'] = 1.5
     matplotlib.rcParams['axes.labelsize'] = 'xx-large'
 
-    fig = plt.figure(figsize=(5.0, 5.0))
+    fig = plt.figure(figsize=(10.0, 10.0))
     ax = fig.add_subplot(1, 1, 1)
     plt.subplots_adjust(left=0.17, right=0.93, top=0.97,
             bottom=0.11, wspace=0.35)
@@ -1115,7 +1115,7 @@ def plotImage(model, data, config, modeltype, fitresult, tag=''):
 
     bigtag = '.' + modeltype + '.' + tag
 
-    savefig('LensedSBmap' + bigtag + '.png')
+    savefig('LensedSBmap' + bigtag + '.pdf', format='pdf')
     #plt.clf()
 
 def removeTempFiles():
