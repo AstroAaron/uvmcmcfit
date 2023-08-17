@@ -96,10 +96,12 @@ def writeVis(vis_complex, visdataloc, modelvisloc, miriad=False):
         from taskinit import tb
         print("Writing visibility data to " + modelvisloc)
         os.system('rm -rf ' + modelvisloc)
-        tb.open(visdataloc)
+        tb.close()
+        lock_options = {'option': 'auto'}
+        tb.open(visdataloc, lockoptions=lock_options)
         tb.copy(modelvisloc)
         tb.close()
-        tb.open(modelvisloc, nomodify=False)
+        tb.open(modelvisloc, nomodify=False, lockoptions=lock_options)
         datashape = tb.getcol('DATA').shape
         vis_complex = vis_complex.reshape(datashape)
         tb.putcol('DATA', vis_complex)
