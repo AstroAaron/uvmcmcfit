@@ -16,6 +16,7 @@
 
 import numpy as N
 
+
 def xy_rotate(x, y, xcen, ycen, phi):
     """
     NAME: xy_rotate
@@ -41,7 +42,8 @@ def xy_rotate(x, y, xcen, ycen, phi):
     phirad = N.deg2rad(phi)
     xnew = (x - xcen) * N.cos(phirad) + (y - ycen) * N.sin(phirad)
     ynew = (y - ycen) * N.cos(phirad) - (x - xcen) * N.sin(phirad)
-    return (xnew,ynew)
+    return (xnew, ynew)
+
 
 def delta_2d(x, y, par):
     """
@@ -59,25 +61,26 @@ def delta_2d(x, y, par):
         par[1]: y-center
         par[2]: radius of a single pixel
         par[3-5]: unused
-        
+
     RETURNS: 2D Delta function evaluated at x-y coords
 
     WRITTEN: R. S. Bussmann, 2013 November, Cornell University
     """
     square = x.copy()
-    square[:] = 0.
+    square[:] = 0.0
     offx = x - par[0]
     offy = y - par[1]
-    offset = N.sqrt(offx ** 2 + offy ** 2)
+    offset = N.sqrt(offx**2 + offy**2)
     index = offset < par[2]
-    #xspot = x[:, 0] == par[0]
-    #yspot = y[0, :] == par[1]
+    # xspot = x[:, 0] == par[0]
+    # yspot = y[0, :] == par[1]
     square[index] = 1.0
-    #import pdb; pdb.set_trace()
-    #import matplotlib.pyplot as plt
-    #plt.imshow(square, origin='lower')
-    #plt.show()
+    # import pdb; pdb.set_trace()
+    # import matplotlib.pyplot as plt
+    # plt.imshow(square, origin='lower')
+    # plt.show()
     return square
+
 
 def ellipse_2d(x, y, par):
     """
@@ -97,25 +100,26 @@ def ellipse_2d(x, y, par):
         par[3]: y-center
         par[4]: axis ratio
         par[5]: c.c.w. major-axis rotation w.r.t. x-axis
-        
+
     RETURNS: 2D Gaussian evaluated at x-y coords
 
     NOTE: amplitude = 1 is peak flux, not normalized total flux
 
     WRITTEN: Adam S. Bolton, U. of Utah, 2009
     """
-    (xnew,ynew) = xy_rotate(x, y, -par[2], par[3], par[5])
-    r_ell_sq = ((xnew**2)*par[4] + (ynew**2)/par[4]) / N.abs(par[1])**2
+    (xnew, ynew) = xy_rotate(x, y, -par[2], par[3], par[5])
+    r_ell_sq = ((xnew**2) * par[4] + (ynew**2) / par[4]) / N.abs(par[1]) ** 2
     ellipse = r_ell_sq.copy()
-    ellipse[:] = 0.
+    ellipse[:] = 0.0
     inside = r_ell_sq < 1
     ellipse[inside] = par[0]
-    #import matplotlib.pyplot as plt
-    #plt.imshow(r_ell_sq, origin='lower', vmax=10*par[1])
-    #plt.colorbar()
-    #plt.contour(ellipse)
-    #plt.show()
+    # import matplotlib.pyplot as plt
+    # plt.imshow(r_ell_sq, origin='lower', vmax=10*par[1])
+    # plt.colorbar()
+    # plt.contour(ellipse)
+    # plt.show()
     return ellipse
+
 
 def gauss_2d(x, y, par):
     """
@@ -135,18 +139,19 @@ def gauss_2d(x, y, par):
         par[3]: y-center
         par[4]: axis ratio
         par[5]: c.c.w. major-axis rotation w.r.t. y-axis
-        
+
     RETURNS: 2D Gaussian evaluated at x-y coords
 
     NOTE: amplitude = 1 is peak flux, not normalized total flux
 
     WRITTEN: Adam S. Bolton, U. of Utah, 2009
     """
-    (xnew,ynew) = xy_rotate(x, y, -par[2], par[3], par[5] + 90)
-    r_ell_sq = ((xnew**2)*par[4] + (ynew**2)/par[4]) / N.abs(par[1])**2
-    expgauss = N.exp(-0.5*r_ell_sq)
-    #import pdb; pdb.set_trace()
+    (xnew, ynew) = xy_rotate(x, y, -par[2], par[3], par[5] + 90)
+    r_ell_sq = ((xnew**2) * par[4] + (ynew**2) / par[4]) / N.abs(par[1]) ** 2
+    expgauss = N.exp(-0.5 * r_ell_sq)
+    # import pdb; pdb.set_trace()
     return par[0] * expgauss
+
 
 def sie_grad(x, y, par):
     """
@@ -180,55 +185,55 @@ def sie_grad(x, y, par):
     WRITTEN: Adam S. Bolton, U of Utah, 2009
     """
     # Set parameters:
-    b = N.abs(par[0]) # can't be negative!!!
-    xzero = 0. if (len(par) < 2) else -par[1]
-    yzero = 0. if (len(par) < 3) else par[2]
-    q = 1. if (len(par) < 4) else N.abs(par[3])
-    phiq = 0. if (len(par) < 5) else par[4]
-    eps = 0.001 # for sqrt(1/q - q) < eps, a limit expression is used.
+    b = N.abs(par[0])  # can't be negative!!!
+    xzero = 0.0 if (len(par) < 2) else -par[1]
+    yzero = 0.0 if (len(par) < 3) else par[2]
+    q = 1.0 if (len(par) < 4) else N.abs(par[3])
+    phiq = 0.0 if (len(par) < 5) else par[4]
+    eps = 0.001  # for sqrt(1/q - q) < eps, a limit expression is used.
     # Handle q > 1 gracefully:
-    if (q > 1.):
+    if q > 1.0:
         q = 1.0 / q
         phiq = phiq + 90.0
     # Go into shifted coordinats of the potential:
     phirad = N.deg2rad(phiq + 90)
-    xsie = (x-xzero) * N.cos(phirad) + (y-yzero) * N.sin(phirad)
-    ysie = (y-yzero) * N.cos(phirad) - (x-xzero) * N.sin(phirad)
+    xsie = (x - xzero) * N.cos(phirad) + (y - yzero) * N.sin(phirad)
+    ysie = (y - yzero) * N.cos(phirad) - (x - xzero) * N.sin(phirad)
     # Compute potential gradient in the transformed system:
     r_ell = N.sqrt(q * xsie**2 + ysie**2 / q)
-    qfact = N.sqrt(1./q - q)
+    qfact = N.sqrt(1.0 / q - q)
     # (r_ell == 0) terms prevent divide-by-zero problems
-    if (qfact >= eps):
-        xtg = (b/qfact) * N.arctan(qfact * xsie / (r_ell + (r_ell == 0)))
-        ytg = (b/qfact) * N.arctanh(qfact * ysie / (r_ell + (r_ell == 0)))
+    if qfact >= eps:
+        xtg = (b / qfact) * N.arctan(qfact * xsie / (r_ell + (r_ell == 0)))
+        ytg = (b / qfact) * N.arctanh(qfact * ysie / (r_ell + (r_ell == 0)))
         # force r_ell to be greater than 0.1
         thresh = 1e-3
         toolow = (r_ell - b < thresh) & (r_ell - b > 0)
-        r_ell[toolow] = r_ell[toolow].mean()#b + thresh
+        r_ell[toolow] = r_ell[toolow].mean()  # b + thresh
         toolow = (r_ell - b > -thresh) & (r_ell - b < 0)
-        r_ell[toolow] = r_ell[toolow].mean()#b - thresh
+        r_ell[toolow] = r_ell[toolow].mean()  # b - thresh
         M = 1 - b / (r_ell + (r_ell == 0))
-        mu = N.abs(1. / M)
-        #plt.imshow(mu, origin='lower')
-        #plt.colorbar()
-        #plt.show()
+        mu = N.abs(1.0 / M)
+        # plt.imshow(mu, origin='lower')
+        # plt.colorbar()
+        # plt.show()
     else:
         xtg = b * xsie / (r_ell + (r_ell == 0))
         ytg = b * ysie / (r_ell + (r_ell == 0))
         M = 1 - b / (r_ell + (r_ell == 0))
-        mu = N.abs(1. / M)
+        mu = N.abs(1.0 / M)
     # Transform back to un-rotated system:
     xg = xtg * N.cos(phirad) - ytg * N.sin(phirad)
     yg = ytg * N.cos(phirad) + xtg * N.sin(phirad)
-    #import matplotlib.pyplot as plt
-    #plt.imshow(M, origin='lower')
-    #plt.colorbar()
-    #plt.show()
+    # import matplotlib.pyplot as plt
+    # plt.imshow(M, origin='lower')
+    # plt.colorbar()
+    # plt.show()
     # Return value:
     return (xg, yg, mu)
 
-def sbmap(x, y, nlens, nsource, parameters, model_types, computeamp=True):
 
+def sbmap(x, y, nlens, nsource, parameters, model_types, computeamp=True):
     # define the x, y, and magnification maps
     dx = x.copy()
     dy = y.copy()
@@ -237,7 +242,6 @@ def sbmap(x, y, nlens, nsource, parameters, model_types, computeamp=True):
 
     # loop over each lens
     for i in range(nlens):
-
         # Set SIE lens-model parameters and pack them into an array:
         i5 = i * nparlens
         lpar = []
@@ -264,7 +268,6 @@ def sbmap(x, y, nlens, nsource, parameters, model_types, computeamp=True):
     amp1 = []
     amp2 = []
     for i in range(nsource):
-
         i6 = i * 6
 
         # Set Gaussian source parameters and pack them into an array:
@@ -276,42 +279,42 @@ def sbmap(x, y, nlens, nsource, parameters, model_types, computeamp=True):
 
         # compute the peak flux of the unlensed Gaussian
         model_type = model_types[i]
-        if model_type == 'Delta':
+        if model_type == "Delta":
             g_image = delta_2d(x, y, gpar)
-        if model_type == 'Gaussian':
+        if model_type == "Gaussian":
             g_image = gauss_2d(x, y, gpar)
-        if model_type == 'cylinder':
+        if model_type == "cylinder":
             g_image = ellipse_2d(x, y, gpar)
         totalflux = g_image.sum()
         if totalflux == 0:
-            totalflux = 1.
+            totalflux = 1.0
         normflux = parameters[i6 + interindx] / totalflux
-        if model_types[i] != 'Delta':
+        if model_types[i] != "Delta":
             gpar[0] *= normflux * 1e-3
 
         # re-evaluate unlensed image with normalized flux
         if computeamp:
-            if model_type == 'Gaussian':
+            if model_type == "Gaussian":
                 g_image = gauss_2d(x, y, gpar)
-            if model_type == 'cylinder':
+            if model_type == "cylinder":
                 g_image = ellipse_2d(x, y, gpar)
 
         if nlens > 0:
             # Evaluate lensed Gaussian image:
-            if model_type == 'Delta':
+            if model_type == "Delta":
                 tmplens = delta_2d(dx, dy, gpar)
-            if model_type == 'Gaussian':
+            if model_type == "Gaussian":
                 tmplens = gauss_2d(dx, dy, gpar)
-            if model_type == 'cylinder':
+            if model_type == "cylinder":
                 tmplens = ellipse_2d(dx, dy, gpar)
             g_lensimage += tmplens
         else:
             # Use the unlensed (but normalized) Gaussian image
-            if model_type == 'Delta':
+            if model_type == "Delta":
                 tmplens = delta_2d(x, y, gpar)
-            if model_type == 'Gaussian':
+            if model_type == "Gaussian":
                 tmplens = gauss_2d(x, y, gpar)
-            if model_type == 'cylinder':
+            if model_type == "cylinder":
                 tmplens = ellipse_2d(x, y, gpar)
             g_lensimage += tmplens
 

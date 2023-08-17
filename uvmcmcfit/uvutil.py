@@ -5,14 +5,13 @@ Shane Bussmann
 Varius utilities related to operations on uvfits data files.
 """
 
-from __future__ import print_function
 
 import numpy
 from astropy.io import fits
 
-def pcdload(visfile):
 
-    checker = visfile.find('uvfits')
+def pcdload(visfile):
+    checker = visfile.find("uvfits")
     if checker == -1:
         uvfits = False
     else:
@@ -22,24 +21,22 @@ def pcdload(visfile):
         visdata = fits.open(visfile)
         visheader = visdata[0].header
 
-        if visheader['NAXIS'] == 7:
-
+        if visheader["NAXIS"] == 7:
             # identify the phase center
             try:
-                pcd_ra = visdata['AIPS SU '].data['RAEPO'][0]
-                pcd_dec = visdata['AIPS SU '].data['DECEPO'][0]
+                pcd_ra = visdata["AIPS SU "].data["RAEPO"][0]
+                pcd_dec = visdata["AIPS SU "].data["DECEPO"][0]
             except:
-                pcd_ra = visheader['CRVAL6']
-                pcd_dec = visheader['CRVAL7']
+                pcd_ra = visheader["CRVAL6"]
+                pcd_dec = visheader["CRVAL7"]
             if pcd_ra < 0:
                 pcd_ra += 360
             pcd = [pcd_ra, pcd_dec]
             return pcd
 
-        if visheader['NAXIS'] == 6:
-
-            pcd_ra = visdata[0].header['CRVAL5']
-            pcd_dec = visdata[0].header['CRVAL6']
+        if visheader["NAXIS"] == 6:
+            pcd_ra = visdata[0].header["CRVAL5"]
+            pcd_dec = visdata[0].header["CRVAL6"]
             if pcd_ra < 0:
                 pcd_ra += 360
             pcd = [pcd_ra, pcd_dec]
@@ -71,22 +68,23 @@ def MSpcd(msFile):
     """
 
     from taskinit import tb
-    tb.open(msFile + '/FIELD')
-    old = tb.getcol('DELAY_DIR') #, fieldid
-    new = tb.getcol('PHASE_DIR')
+
+    tb.open(msFile + "/FIELD")
+    old = tb.getcol("DELAY_DIR")  # , fieldid
+    new = tb.getcol("PHASE_DIR")
 
     def shiftRA(ra):
         try:
             if len(ra) > 1:
-                ra = [ra_i + numpy.pi * 2 for ra_i in numpy.squeeze(ra) if ra_i < 0.]
+                ra = [ra_i + numpy.pi * 2 for ra_i in numpy.squeeze(ra) if ra_i < 0.0]
             else:
-                if ra < 0.:
-                    ra += numpy.pi * 2.
-#                print(ra)
+                if ra < 0.0:
+                    ra += numpy.pi * 2.0
+        #                print(ra)
         except:
-            if ra < 0.:
-                ra += numpy.pi * 2.
-#            print(ra)
+            if ra < 0.0:
+                ra += numpy.pi * 2.0
+        #            print(ra)
         return ra
 
     # if old.shape[-1] > 1:
@@ -106,7 +104,7 @@ def MSpcd(msFile):
     # _pcd_ra, _pcd_dec = old[0] * 180. / numpy.pi, old[1] * 180. / numpy.pi
 
     # new phase center
-    pcd_ra, pcd_dec = new[0] * 180. / numpy.pi, new[1] * 180. / numpy.pi
+    pcd_ra, pcd_dec = new[0] * 180.0 / numpy.pi, new[1] * 180.0 / numpy.pi
     # print(pcd_ra, pcd_dec)
     tb.close()
     try:
@@ -137,13 +135,14 @@ def MSpcd2(msFile):
     """
 
     from taskinit import ms
+
     ms.open(msFile)
     pc = ms.getfielddirmeas()
     if not isinstance(pc, dict) is True:
         pc()
-    epoch = pc['refer']
-    pcd_dec = pc['m1']['value'] * 180 / numpy.pi
-    pcd_ra = pc['m0']['value'] * 180 / numpy.pi
+    epoch = pc["refer"]
+    pcd_dec = pc["m1"]["value"] * 180 / numpy.pi
+    pcd_ra = pc["m0"]["value"] * 180 / numpy.pi
     if pcd_ra < 0:
         pcd_ra += 360
     ms.done()
@@ -174,11 +173,12 @@ def oldMSpcd(msFile):
     """
 
     from taskinit import tb
-    tb.open(msFile + '/SOURCE')
-    pcd_ra = tb.getcol('DIRECTION')[0][0] * 180 / numpy.pi
+
+    tb.open(msFile + "/SOURCE")
+    pcd_ra = tb.getcol("DIRECTION")[0][0] * 180 / numpy.pi
     if pcd_ra < 0:
         pcd_ra += 360
-    pcd_dec = tb.getcol('DIRECTION')[1][0] * 180 / numpy.pi
+    pcd_dec = tb.getcol("DIRECTION")[1][0] * 180 / numpy.pi
     tb.close()
     pcd = [pcd_ra, pcd_dec]
     return pcd
@@ -208,7 +208,7 @@ def uvload(visfile):
         which looks for nspw to shape model_complex
     """
 
-    checker = visfile.find('uvfits')
+    checker = visfile.find("uvfits")
     if checker == -1:
         uvfits = False
     else:
@@ -218,17 +218,16 @@ def uvload(visfile):
         visibilities = visdata[0].data
         visheader = visdata[0].header
 
-        if visheader['NAXIS'] == 7:
-
+        if visheader["NAXIS"] == 7:
             # identify the channel frequency(ies):
             visfreq = visdata[1].data
-            freq0 = visheader['CRVAL4']
-            dfreq = visheader['CDELT4']
-            cfreq = visheader['CRPIX4']
-            nvis = visibilities['DATA'][:, 0, 0, 0, 0, 0, 0].size
-            nspw = visibilities['DATA'][0, 0, 0, :, 0, 0, 0].size
-            nfreq = visibilities['DATA'][0, 0, 0, 0, :, 0, 0].size
-            npol = visibilities['DATA'][0, 0, 0, 0, 0, :, 0].size
+            freq0 = visheader["CRVAL4"]
+            dfreq = visheader["CDELT4"]
+            cfreq = visheader["CRPIX4"]
+            nvis = visibilities["DATA"][:, 0, 0, 0, 0, 0, 0].size
+            nspw = visibilities["DATA"][0, 0, 0, :, 0, 0, 0].size
+            nfreq = visibilities["DATA"][0, 0, 0, 0, :, 0, 0].size
+            npol = visibilities["DATA"][0, 0, 0, 0, 0, :, 0].size
             if nfreq > 1:
                 uu = numpy.zeros([nvis, nspw, nfreq, npol])
                 vv = numpy.zeros([nvis, nspw, nfreq, npol])
@@ -246,31 +245,30 @@ def uvload(visfile):
                 vv = numpy.zeros([nvis, nspw, npol])
                 ww = numpy.zeros([nvis, nspw, npol])
 
-            #wgt = numpy.zeros([nvis, nspw, nfreq, npol])
+            # wgt = numpy.zeros([nvis, nspw, nfreq, npol])
 
             # get spw frequencies
             # reference freq + offset
             for ispw in range(nspw):
                 if nspw > 1:
-                    freqif = freq0 + visfreq['IF FREQ'][0][ispw]
+                    freqif = freq0 + visfreq["IF FREQ"][0][ispw]
                 else:
                     try:
-                        freqif = freq0 + visfreq['IF FREQ'][0]
+                        freqif = freq0 + visfreq["IF FREQ"][0]
                     except:
                         freqif = freq0
-                #uu[:, ispw] = freqif * visibilities['UU']
-                #vv[:, ispw] = freqif * visibilities['VV']
+                # uu[:, ispw] = freqif * visibilities['UU']
+                # vv[:, ispw] = freqif * visibilities['VV']
 
                 for ipol in range(npol):
-                   # then compute the spatial frequencies:
+                    # then compute the spatial frequencies:
                     if nfreq > 1:
-                        freq = (numpy.arange(nfreq) - cfreq + 1) * \
-                            dfreq + freqif
-                        freqvis = numpy.meshgrid(freq, visibilities['UU'])
+                        freq = (numpy.arange(nfreq) - cfreq + 1) * dfreq + freqif
+                        freqvis = numpy.meshgrid(freq, visibilities["UU"])
                         uu[:, ispw, :, ipol] = freqvis[0] * freqvis[1]
-                        freqvis = numpy.meshgrid(freq, visibilities['VV'])
+                        freqvis = numpy.meshgrid(freq, visibilities["VV"])
                         vv[:, ispw, :, ipol] = freqvis[0] * freqvis[1]
-                        freqvis = numpy.meshgrid(freq, visibilities['WW'])
+                        freqvis = numpy.meshgrid(freq, visibilities["WW"])
                         ww[:, ispw, :, ipol] = freqvis[0] * freqvis[1]
                     else:
                         # if miriad is True:
@@ -285,19 +283,18 @@ def uvload(visfile):
                         #     uu[:, ispw, ipol] = freqif * visibilities['UU']
                         #     vv[:, ispw, ipol] = freqif * visibilities['VV']
                         #     ww[:, ispw, ipol] = freqif * visibilities['WW']
-                        uu[:, ispw, ipol] = freqif * visibilities['UU']
-                        vv[:, ispw, ipol] = freqif * visibilities['VV']
-                        ww[:, ispw, ipol] = freqif * visibilities['WW']
+                        uu[:, ispw, ipol] = freqif * visibilities["UU"]
+                        vv[:, ispw, ipol] = freqif * visibilities["VV"]
+                        ww[:, ispw, ipol] = freqif * visibilities["WW"]
 
-        if visheader['NAXIS'] == 6:
-
+        if visheader["NAXIS"] == 6:
             # identify the channel frequency(ies):
-            freq0 = visheader['CRVAL4']
-            dfreq = visheader['CDELT4']
-            cfreq = visheader['CRPIX4']
-            nvis = visibilities['DATA'][:, 0, 0, 0, 0, 0].size
-            nfreq = visibilities['DATA'][0, 0, 0, :, 0, 0].size
-            npol = visibilities['DATA'][0, 0, 0, 0, :, 0].size
+            freq0 = visheader["CRVAL4"]
+            dfreq = visheader["CDELT4"]
+            cfreq = visheader["CRPIX4"]
+            nvis = visibilities["DATA"][:, 0, 0, 0, 0, 0].size
+            nfreq = visibilities["DATA"][0, 0, 0, :, 0, 0].size
+            npol = visibilities["DATA"][0, 0, 0, 0, :, 0].size
             if nfreq > 1:
                 uu = numpy.zeros([nvis, nfreq, npol])
                 vv = numpy.zeros([nvis, nfreq, npol])
@@ -306,42 +303,42 @@ def uvload(visfile):
                 uu = numpy.zeros([nvis, npol])
                 vv = numpy.zeros([nvis, npol])
                 ww = numpy.zeros([nvis, npol])
-            #wgt = numpy.zeros([nvis, nspw, nfreq, npol])
+            # wgt = numpy.zeros([nvis, nspw, nfreq, npol])
 
             freqif = freq0
-            #uu[:, ispw] = freqif * visibilities['UU']
-            #vv[:, ispw] = freqif * visibilities['VV']
+            # uu[:, ispw] = freqif * visibilities['UU']
+            # vv[:, ispw] = freqif * visibilities['VV']
 
             for ipol in range(npol):
-
                 # then compute the spatial frequencies:
                 if nfreq > 1:
                     freq = (numpy.arange(nfreq) - cfreq + 1) * dfreq + freqif
-                    freqvis = numpy.meshgrid(freq, visibilities['UU'])
+                    freqvis = numpy.meshgrid(freq, visibilities["UU"])
                     uu[:, 0, :, ipol] = freqvis[0] * freqvis[1]
-                    freqvis = numpy.meshgrid(freq, visibilities['VV'])
+                    freqvis = numpy.meshgrid(freq, visibilities["VV"])
                     vv[:, 0, :, ipol] = freqvis[0] * freqvis[1]
-                    freqvis = numpy.meshgrid(freq, visibilities['WW'])
+                    freqvis = numpy.meshgrid(freq, visibilities["WW"])
                     ww[:, 0, :, ipol] = freqvis[0] * freqvis[1]
                 else:
-                    uu[:, ipol] = freqif * visibilities['UU']
-                    vv[:, ipol] = freqif * visibilities['VV']
-                    ww[:, ipol] = freqif * visibilities['WW']
+                    uu[:, ipol] = freqif * visibilities["UU"]
+                    vv[:, ipol] = freqif * visibilities["VV"]
+                    ww[:, ipol] = freqif * visibilities["WW"]
 
     else:
         from taskinit import tb
+
         # read in the uvfits data
         tb.open(visfile)
-        uvw = tb.getcol('UVW')
-        uvspw = tb.getcol('DATA_DESC_ID')
+        uvw = tb.getcol("UVW")
+        uvspw = tb.getcol("DATA_DESC_ID")
         tb.close()
 
-        tb.open(visfile + '/SPECTRAL_WINDOW')
-        freq = tb.getcol('CHAN_FREQ')
+        tb.open(visfile + "/SPECTRAL_WINDOW")
+        freq = tb.getcol("CHAN_FREQ")
         tb.close()
 
-        tb.open(visfile + '/POLARIZATION')
-        polinfo = tb.getcol('NUM_CORR')
+        tb.open(visfile + "/POLARIZATION")
+        polinfo = tb.getcol("NUM_CORR")
         tb.close()
         npol = polinfo[0]
 
@@ -371,8 +368,7 @@ def uvload(visfile):
 
 
 def visload(visfile):
-
-    checker = visfile.find('uvfits')
+    checker = visfile.find("uvfits")
     if checker == -1:
         uvfits = False
     else:
@@ -381,46 +377,46 @@ def visload(visfile):
         visdata = fits.open(visfile)
         # get the telescope name
         visheader = visdata[0].header
-        #telescop = visheader['TELESCOP']
+        # telescop = visheader['TELESCOP']
 
         # if we are dealing with SMA data
-        if visheader['NAXIS'] == 6:
-            nfreq = visdata[0].data['DATA'][0, 0, 0, :, 0, 0].size
+        if visheader["NAXIS"] == 6:
+            nfreq = visdata[0].data["DATA"][0, 0, 0, :, 0, 0].size
             if nfreq > 1:
-                data_real = visdata[0].data['DATA'][:, 0, 0, :, :, 0]
-                data_imag = visdata[0].data['DATA'][:, 0, 0, :, :, 1]
-                data_wgt = visdata[0].data['DATA'][:, 0, 0, :, :, 2]
+                data_real = visdata[0].data["DATA"][:, 0, 0, :, :, 0]
+                data_imag = visdata[0].data["DATA"][:, 0, 0, :, :, 1]
+                data_wgt = visdata[0].data["DATA"][:, 0, 0, :, :, 2]
             else:
-                data_real = visdata[0].data['DATA'][:, 0, 0, 0, :, 0]
-                data_imag = visdata[0].data['DATA'][:, 0, 0, 0, :, 1]
-                data_wgt = visdata[0].data['DATA'][:, 0, 0, 0, :, 2]
+                data_real = visdata[0].data["DATA"][:, 0, 0, 0, :, 0]
+                data_imag = visdata[0].data["DATA"][:, 0, 0, 0, :, 1]
+                data_wgt = visdata[0].data["DATA"][:, 0, 0, 0, :, 2]
 
         # if we are dealing with ALMA or PdBI data
-        if visheader['NAXIS'] == 7:
-            nfreq = visdata[0].data['DATA'][0, 0, 0, 0, :, 0, 0].size
+        if visheader["NAXIS"] == 7:
+            nfreq = visdata[0].data["DATA"][0, 0, 0, 0, :, 0, 0].size
             if nfreq > 1:
-                data_real = visdata[0].data['DATA'][:, 0, 0, :, :, :, 0]
-                data_imag = visdata[0].data['DATA'][:, 0, 0, :, :, :, 1]
-                data_wgt = visdata[0].data['DATA'][:, 0, 0, :, :, :, 2]
+                data_real = visdata[0].data["DATA"][:, 0, 0, :, :, :, 0]
+                data_imag = visdata[0].data["DATA"][:, 0, 0, :, :, :, 1]
+                data_wgt = visdata[0].data["DATA"][:, 0, 0, :, :, :, 2]
             else:
-                data_real = visdata[0].data['DATA'][:, 0, 0, :, 0, :, 0]
-                data_imag = visdata[0].data['DATA'][:, 0, 0, :, 0, :, 1]
-                data_wgt = visdata[0].data['DATA'][:, 0, 0, :, 0, :, 2]
+                data_real = visdata[0].data["DATA"][:, 0, 0, :, 0, :, 0]
+                data_imag = visdata[0].data["DATA"][:, 0, 0, :, 0, :, 1]
+                data_wgt = visdata[0].data["DATA"][:, 0, 0, :, 0, :, 2]
 
-        data_complex = numpy.array(data_real) + \
-            1j * numpy.array(data_imag)
+        data_complex = numpy.array(data_real) + 1j * numpy.array(data_imag)
 
     else:
         from taskinit import tb
+
         # read in the CASA MS
         tb.open(visfile)
-        vis_complex = tb.getcol('DATA')
-        vis_weight = tb.getcol('WEIGHT')
+        vis_complex = tb.getcol("DATA")
+        vis_weight = tb.getcol("WEIGHT")
         tb.close()
 
-        #tb.open(visfile + '/POLARIZATION')
-        #polinfo = tb.getcol('NUM_CORR')
-        #npol = polinfo[0]
+        # tb.open(visfile + '/POLARIZATION')
+        # polinfo = tb.getcol('NUM_CORR')
+        # npol = polinfo[0]
 
         data_complex = vis_complex
         data_wgt = vis_weight
@@ -431,13 +427,13 @@ def visload(visfile):
             wgtshape = (npol, 1, nrow)
 
         data_wgt = data_wgt.reshape(wgtshape)
-        #data_complex = []
-        #data_wgt = []
+        # data_complex = []
+        # data_wgt = []
         # for ipol in range(npol):
         #    data_complex.append(vis_complex[ipol, 0, :])
         #    data_wgt.append(vis_weight[ipol, :])
-        #data_complex = numpy.array(data_complex)
-        #data_wgt = numpy.array(data_wgt)
+        # data_complex = numpy.array(data_complex)
+        # data_wgt = numpy.array(data_wgt)
 
     return data_complex, data_wgt
 
@@ -459,8 +455,8 @@ def getStatWgt(real_raw, imag_raw, wgt_raw):
             imagi = imag_raw[i, gwgt]
             rms_real = numpy.std(reali)
             rms_imag = numpy.std(imagi)
-            rms_avg = (rms_real + rms_imag) / 2.
-            wgt_scaled[i, :] = 1 / rms_avg ** 2
+            rms_avg = (rms_real + rms_imag) / 2.0
+            wgt_scaled[i, :] = 1 / rms_avg**2
     return wgt_scaled
 
 
@@ -493,7 +489,7 @@ def statwt(visfileloc, newvisfileloc, ExcludeChannels=False):
         npol = data_real[0, 0, 0, :].size
         wgt = numpy.zeros([nvis, nspw, nfreq, npol])
     if data_real.ndim == 3:
-    # no spw
+        # no spw
         nvis = data_real[:, 0, 0].size
         nspw = 0
         nfreq = data_real[0, :, 0].size
@@ -502,9 +498,7 @@ def statwt(visfileloc, newvisfileloc, ExcludeChannels=False):
 
     if nspw > 0:
         for ispw in range(nspw):
-
             for ipol in range(npol):
-
                 # compute real and imaginary components of the visibilities
                 real_raw = data_real[:, ispw, :, ipol]
                 imag_raw = data_imag[:, ispw, :, ipol]
@@ -518,11 +512,10 @@ def statwt(visfileloc, newvisfileloc, ExcludeChannels=False):
                 wgt_temp[oktoreplace] = wgt_scaled[oktoreplace]
                 wgt[:, ispw, :, ipol] = wgt_temp
 
-        visfile[0].data['DATA'][:, 0, 0, :, :, :, 2] = wgt
+        visfile[0].data["DATA"][:, 0, 0, :, :, :, 2] = wgt
 
     else:
         for ipol in range(npol):
-
             # compute real and imaginary components of the visibilities
             real_raw = data_real[:, :, ipol]
             imag_raw = data_imag[:, :, ipol]
@@ -533,17 +526,19 @@ def statwt(visfileloc, newvisfileloc, ExcludeChannels=False):
 
         # visfile[0].data['DATA'][:, 0, 0, :, :, 2] = wgt
 
-        import pdb; pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
         if nfreq > 1:
             try:
-                visfile[0].data['DATA'][:, 0, 0, :, :, :, 2] = wgt
+                visfile[0].data["DATA"][:, 0, 0, :, :, :, 2] = wgt
             except ValueError:
                 # wgt.ndim is 3 if data_real.dim is 3
                 if data_real.ndim == 3:
-                # wgt.shape is defined using nvis, nfreq, npol
-                    visfile[0].data['DATA'][:, 0, 0, 0, :, :, 2] = wgt
+                    # wgt.shape is defined using nvis, nfreq, npol
+                    visfile[0].data["DATA"][:, 0, 0, 0, :, :, 2] = wgt
         elif nfreq == 1:
-                visfile[0].data['DATA'][:, 0, 0, :, 0, :, 2] = wgt
+            visfile[0].data["DATA"][:, 0, 0, :, 0, :, 2] = wgt
 
     visfile.writeto(newvisfileloc)
 
@@ -577,7 +572,7 @@ def scalewt(visdataloc, newvisdataloc):
     wgt_scaled = data_wgt
     wgzero = wgt_scaled > 0
     N_vis = 2 * wgt_scaled[wgzero].size
-    wgtrealimag = wgt_scaled * (data_real ** 2 + data_imag ** 2)
+    wgtrealimag = wgt_scaled * (data_real**2 + data_imag**2)
     wgtsum = wgtrealimag[wgzero].sum()
     wgtscale = N_vis / wgtsum
     print("Scaling the weights by a factor of ", wgtscale)
@@ -585,21 +580,20 @@ def scalewt(visdataloc, newvisdataloc):
 
     # read in the uvfits data
     if data_real.ndim == 4:
-        visfile[0].data['DATA'][:, 0, 0, :, :, :, 2] = wgt_scaled
+        visfile[0].data["DATA"][:, 0, 0, :, :, :, 2] = wgt_scaled
     else:
-        if visfile[0].header['NAXIS'] == 6:
-            nfreq = visfile[0].data['DATA'][0, 0, 0, :, 0, 0].size
+        if visfile[0].header["NAXIS"] == 6:
+            nfreq = visfile[0].data["DATA"][0, 0, 0, :, 0, 0].size
             if nfreq > 1:
-                visfile[0].data['DATA'][:, 0, 0, :, :, 2] = wgt_scaled
+                visfile[0].data["DATA"][:, 0, 0, :, :, 2] = wgt_scaled
             else:
-                visfile[0].data['DATA'][:, 0, 0, 0, :, 2] = wgt_scaled
-        if visfile[0].header['NAXIS'] == 7:
-            visfile[0].data['DATA'][:, 0, 0, 0, :, :, 2] = wgt_scaled
+                visfile[0].data["DATA"][:, 0, 0, 0, :, 2] = wgt_scaled
+        if visfile[0].header["NAXIS"] == 7:
+            visfile[0].data["DATA"][:, 0, 0, 0, :, :, 2] = wgt_scaled
     visfile.writeto(newvisdataloc, clobber=True)
 
 
 def zerowt(visdataloc, newvisdataloc, ExcludeChannels):
-
     visfile = fits.open(visdataloc)
     data_real, data_imag, data_wgt = visload(visfile)
     nwindows = len(ExcludeChannels) / 2
@@ -607,10 +601,11 @@ def zerowt(visdataloc, newvisdataloc, ExcludeChannels):
         chan1 = ExcludeChannels[win]
         chan2 = ExcludeChannels[win + 1]
         if data_real.ndim == 4:
-            visfile[0].data['DATA'][:, 0, 0, :, chan1:chan2, :, 2] = 0.0
+            visfile[0].data["DATA"][:, 0, 0, :, chan1:chan2, :, 2] = 0.0
         else:
-            visfile[0].data['DATA'][:, 0, 0, chan1:chan2, :, 2] = 0.0
+            visfile[0].data["DATA"][:, 0, 0, chan1:chan2, :, 2] = 0.0
     visfile.writeto(newvisdataloc)
+
 
 # AS OF 2014-02-24, spectralavg IS NON-FUNCTIONAL
 
@@ -643,11 +638,8 @@ def spectralavg(visdataloc, newvisdataloc, Nchannels):
     chan2 = chan1 + dchan
     if nspw > 1:
         for ispw in range(nspw):
-
             for ipol in range(npol):
-
                 for ichan in range(Nchannels):
-
                     for i in range(nvis):
                         gwgt = data_wgt[i, ispw, chan1:chan2, ipol] > 0
                         ngwgt = data_wgt[i, ispw, gwgt, ipol].size
@@ -667,19 +659,17 @@ def spectralavg(visdataloc, newvisdataloc, Nchannels):
         newvis[:, 0, 0, :, :, :, 1] = imag_bin
         newvis[:, 0, 0, :, :, :, 2] = wgt_bin
 
-        oldcrpix4 = vis_data[0].header['CRPIX4']
+        oldcrpix4 = vis_data[0].header["CRPIX4"]
         newcrpix4 = numpy.float(oldcrpix4) / nchan * Nchannels
         newcrpix4 = numpy.floor(newcrpix4) + 1
-        vis_data[0].header['CRPIX4'] = newcrpix4
+        vis_data[0].header["CRPIX4"] = newcrpix4
 
-        oldcdelt4 = vis_data[0].header['CDELT4']
+        oldcdelt4 = vis_data[0].header["CDELT4"]
         newcdelt4 = oldcdelt4 * nchan / Nchannels
-        vis_data[0].header['CDELT4'] = newcdelt4
+        vis_data[0].header["CDELT4"] = newcdelt4
     else:
         for ipol in range(npol):
-
             for ichan in range(Nchannels):
-
                 for i in range(nvis):
                     gwgt = data_wgt[i, chan1:chan2, ipol] > 0
                     ngwgt = data_wgt[i, gwgt, ipol].size
@@ -699,16 +689,16 @@ def spectralavg(visdataloc, newvisdataloc, Nchannels):
         newvis[:, 0, 0, :, :, 1] = imag_bin
         newvis[:, 0, 0, :, :, 2] = wgt_bin
 
-        oldcrpix4 = vis_data[0].header['CRPIX4']
+        oldcrpix4 = vis_data[0].header["CRPIX4"]
         newcrpix4 = numpy.float(oldcrpix4) / nchan * Nchannels
         newcrpix4 = numpy.floor(newcrpix4) + 1
-        vis_data[0].header['CRPIX4'] = newcrpix4
-        vis_data[0].header['NAXIS4'] = Nchannels
+        vis_data[0].header["CRPIX4"] = newcrpix4
+        vis_data[0].header["NAXIS4"] = Nchannels
 
-        oldcdelt4 = vis_data[0].header['CDELT4']
+        oldcdelt4 = vis_data[0].header["CDELT4"]
         newcdelt4 = oldcdelt4 * nchan / Nchannels
-        vis_data[0].header['CDELT4'] = newcdelt4
-    vis_data[0].data['DATA'][:] = newvis
+        vis_data[0].header["CDELT4"] = newcdelt4
+    vis_data[0].data["DATA"][:] = newvis
     vis_data.writeto(newvisdataloc)
 
 
@@ -728,15 +718,16 @@ def getFreqfromtb(msFile):
     """
 
     from taskinit import tb
-    tb.open(msFile+'/SPECTRAL_WINDOW')
-    freq0 = tb.getcol('REF_FREQUENCY')
-    nchan = tb.getcol('NUM_CHAN')
+
+    tb.open(msFile + "/SPECTRAL_WINDOW")
+    freq0 = tb.getcol("REF_FREQUENCY")
+    nchan = tb.getcol("NUM_CHAN")
     tb.close()
     return freq0
 
 
 def checkMS(msFile, cont=True):
-    """ get the number of spw and channels in the measurement set
+    """get the number of spw and channels in the measurement set
     for continuum: combine into 1 channel and spw before running uvmcmcfit
 
     Parameters
@@ -753,6 +744,7 @@ def checkMS(msFile, cont=True):
 
     """
     from taskinit import ms
+
     ms.open(msFile)
     metadata = ms.metadata()
     ms.done()
@@ -762,5 +754,3 @@ def checkMS(msFile, cont=True):
         nchan = metadata.nchan(spw)
     metadata.done()
     return nspw, nchan
-
-

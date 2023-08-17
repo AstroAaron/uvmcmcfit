@@ -11,15 +11,18 @@ v, and w values as well.
 
 """
 
-import uvutil
-import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+import numpy as np
+import uvutil
+
+matplotlib.use("Agg")
+import os
+from subprocess import call
+
 import matplotlib.pyplot as plt
 from pylab import savefig
-from subprocess import call
-import uvmodel
-import os
+
+from . import uvmodel
 
 
 def iterPlot(simvis, nfigures, color, label):
@@ -29,7 +32,8 @@ def iterPlot(simvis, nfigures, color, label):
 
     for i in range(nfigures):
         plt.figure(i)
-        plt.plot(simvis[i, :], ',', color=color, label=label)
+        plt.plot(simvis[i, :], ",", color=color, label=label)
+
 
 def rollUp(visfile):
     u, v, w = uvutil.uvload(visfile)
@@ -46,41 +50,43 @@ def rollUp(visfile):
     rolled[5, :] = weight.flatten()
     return rolled
 
+
 def savePlots(names, nfigures, colors):
     for i in range(nfigures):
         name = names[i]
         plt.figure(i)
         plt.ylabel(name)
-        plt.xlabel('Observation Number')
+        plt.xlabel("Observation Number")
         plt.legend()
-        leg = plt.legend(loc = 'best')
+        leg = plt.legend(loc="best")
         for i, text in enumerate(leg.get_texts()):
             color = colors[i]
-            plt.setp(text, color = color)
+            plt.setp(text, color=color)
         plt.tight_layout()
-        savefig('viscompare_' + name + '.pdf')
-        print("Finished saving " + name + " figure!")
+        savefig("viscompare_" + name + ".pdf")
+        print(("Finished saving " + name + " figure!"))
+
 
 def iterFig(uvmcmcfitFile, miriadFile):
-
     uvmcmcfit = rollUp(uvmcmcfitFile)
     miriad = rollUp(miriadFile)
-    #miriad[5, :] = miriad[5, :] * 2
+    # miriad[5, :] = miriad[5, :] * 2
     difference = uvmcmcfit - miriad
 
     nfigures = uvmcmcfit[:, 0].size
 
     plt.ioff()
-    iterPlot(uvmcmcfit, nfigures, 'red', 'uvmcmcfit')
+    iterPlot(uvmcmcfit, nfigures, "red", "uvmcmcfit")
     print("Finished plotting uvmcmcfit data!")
-    iterPlot(miriad, nfigures, 'blue', 'miriad')
+    iterPlot(miriad, nfigures, "blue", "miriad")
     print("Finished plotting miriad data!")
-    iterPlot(difference, nfigures, 'black', 'difference')
+    iterPlot(difference, nfigures, "black", "difference")
     print("Finished plotting uvmcmcfit - miriad data!")
 
-    names = ['u', 'v', 'w', 'real', 'imaginary', 'weights']
-    colors = ['red', 'blue', 'black']
+    names = ["u", "v", "w", "real", "imaginary", "weights"]
+    colors = ["red", "blue", "black"]
     savePlots(names, nfigures, colors)
+
 
 def miriadVis(model, data, simfile):
     """
@@ -90,41 +96,48 @@ def miriadVis(model, data, simfile):
     # first turn the model image into miriad format, image domain
     try:
         oldbase_model = os.path.splitext(model)[0]
-        modelmiriad = oldbase_model + '.miriad'
-        cmd = 'rm -rf ' + modelmiriad
+        modelmiriad = oldbase_model + ".miriad"
+        cmd = "rm -rf " + modelmiriad
         call(cmd, shell=True)
     except:
         print("Uh oh, couldn't remove the existing file.")
     try:
-        cmd = 'fits op=xyin in=' + model + ' out=' + modelmiriad
+        cmd = "fits op=xyin in=" + model + " out=" + modelmiriad
         call(cmd, shell=True)
     except:
         print("Uh oh, couldn't make the miriad model image.")
 
     # next, turn the observed visibilities into miriad format, uv domain
     oldbase_data = os.path.splitext(data)[0]
-    datamiriad = oldbase_data + '.miriad'
-    cmd = 'rm -rf ' + datamiriad
+    datamiriad = oldbase_data + ".miriad"
+    cmd = "rm -rf " + datamiriad
     call(cmd, shell=True)
-    cmd = 'fits op=uvin in=' + data + ' out=' + datamiriad
+    cmd = "fits op=uvin in=" + data + " out=" + datamiriad
     call(cmd, shell=True)
 
     # next, make the simulated visibilities
-    cmd = 'rm -rf ' + simfile
+    cmd = "rm -rf " + simfile
     call(cmd, shell=True)
-    cmd = 'uvmodel options=replace model=' + modelmiriad + ' vis=' + \
-            datamiriad + ' out=' + simfile
+    cmd = (
+        "uvmodel options=replace model="
+        + modelmiriad
+        + " vis="
+        + datamiriad
+        + " out="
+        + simfile
+    )
     call(cmd, shell=True)
 
     # and convert the simulated visibilities to uvfits format
     oldbase_sim = os.path.splitext(simfile)[0]
-    simfilefits = oldbase_sim + '.uvfits'
-    cmd = 'rm -rf ' + simfilefits
+    simfilefits = oldbase_sim + ".uvfits"
+    cmd = "rm -rf " + simfilefits
     call(cmd, shell=True)
-    cmd = 'fits op=uvout in=' + simfile + ' out=' + simfilefits
+    cmd = "fits op=uvout in=" + simfile + " out=" + simfilefits
     call(cmd, shell=True)
 
+
 def uvmcmcfitVis(model, data, simfile):
-    #cmd = 'rm -rf ' + simfile
-    #call(cmd, shell=True)
+    # cmd = 'rm -rf ' + simfile
+    # call(cmd, shell=True)
     uvmodel.replace(model, data, simfile, miriad=True)

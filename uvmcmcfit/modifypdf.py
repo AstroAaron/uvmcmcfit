@@ -8,47 +8,45 @@ functions.
 
 """
 
-from __future__ import print_function
 
-from astropy.table import Table
 import numpy
+from astropy.table import Table
 
 
 def trim(oldpdfloc, newpdfloc, niters=5000):
-
     # get the last niters iterations
-    PDFdata = Table.read(oldpdfloc, format='ascii')
+    PDFdata = Table.read(oldpdfloc, format="ascii")
     PDFdata = PDFdata[-niters:]
 
     # write the trimmed list
-    PDFdata.write(newpdfloc, format='ascii')
+    PDFdata.write(newpdfloc, format="ascii")
+
 
 def bigScoop(PDFdata, Nbuffer=300):
-
-    """ get model fits within Nbuffer of the best-fit model. """
-    lnprob = PDFdata['lnprob']
+    """get model fits within Nbuffer of the best-fit model."""
+    lnprob = PDFdata["lnprob"]
     good = lnprob > lnprob.max() - Nbuffer
     PDFdata = PDFdata[good]
 
     # write the trimmed list
     return PDFdata
 
-def goodMu(PDFdata):
 
-    """ get model fits with mu < 100. """
+def goodMu(PDFdata):
+    """get model fits with mu < 100."""
 
     # search for magnification measurements
-    lnprob = PDFdata['lnprob']
+    lnprob = PDFdata["lnprob"]
     good = lnprob > lnprob.max() - 300
     PDFdata = PDFdata[good]
 
     # write the trimmed list
     return PDFdata
 
-def cleanColumns(PDFdata):
 
+def cleanColumns(PDFdata):
     # get the last niters iterations
-    PDFkeys = PDFdata.keys()
+    PDFkeys = list(PDFdata.keys())
     for key in PDFkeys:
         rms = numpy.std(PDFdata[key])
         if rms == 0:
@@ -57,40 +55,40 @@ def cleanColumns(PDFdata):
     # write the trimmed list
     return PDFdata
 
-def prune(PDFdata, scaler=5.0, quiet=False):
 
+def prune(PDFdata, scaler=5.0, quiet=False):
     # get the last niters iterations
-    #PDFdata = Table.read(oldpdfloc, format='ascii')
-    okok = PDFdata['lnprob'] * 0 == 0
+    # PDFdata = Table.read(oldpdfloc, format='ascii')
+    okok = PDFdata["lnprob"] * 0 == 0
     PDFdata = PDFdata[okok]
 
     if not quiet:
-        print("Pre-pruning, <Lnprob>: {:f}".format(PDFdata['lnprob'].mean()))
-    #import pdb; pdb.set_trace()
+        print("Pre-pruning, <Lnprob>: {:f}".format(PDFdata["lnprob"].mean()))
+    # import pdb; pdb.set_trace()
 
     # identify the good fits
-    lnprob = PDFdata['lnprob']
-    #PDFdata['lnprob'] = lnprob
+    lnprob = PDFdata["lnprob"]
+    # PDFdata['lnprob'] = lnprob
     minlnprob = lnprob.max()
     dlnprob = numpy.abs(lnprob - minlnprob)
     medlnprob = numpy.median(dlnprob)
     avglnprob = numpy.mean(dlnprob)
     skewlnprob = numpy.abs(avglnprob - medlnprob)
     rmslnprob = numpy.std(dlnprob)
-    inliers = (dlnprob < scaler*rmslnprob)
+    inliers = dlnprob < scaler * rmslnprob
     PDFdata = PDFdata[inliers]
-    medlnprob_previous = 0.
-    while skewlnprob > 0.1*medlnprob:
-        lnprob = PDFdata['lnprob']
+    medlnprob_previous = 0.0
+    while skewlnprob > 0.1 * medlnprob:
+        lnprob = PDFdata["lnprob"]
         minlnprob = lnprob.max()
         dlnprob = numpy.abs(lnprob - minlnprob)
         rmslnprob = numpy.std(dlnprob)
-        inliers = (dlnprob < scaler*rmslnprob)
+        inliers = dlnprob < scaler * rmslnprob
         PDFdatatmp = PDFdata[inliers]
         if len(PDFdatatmp) == len(PDFdata):
-            inliers = (dlnprob < scaler/2.*rmslnprob)
+            inliers = dlnprob < scaler / 2.0 * rmslnprob
         PDFdata = PDFdata[inliers]
-        lnprob = PDFdata['lnprob']
+        lnprob = PDFdata["lnprob"]
         dlnprob = numpy.abs(lnprob - minlnprob)
         medlnprob = numpy.median(dlnprob)
         avglnprob = numpy.mean(dlnprob)
@@ -101,11 +99,11 @@ def prune(PDFdata, scaler=5.0, quiet=False):
             scaler /= 1.5
         medlnprob_previous = medlnprob
 
-    #PDFdatagood = PDFdata.copy()
+    # PDFdatagood = PDFdata.copy()
     # identify the good fits
-    goodfits = (PDFdata['lnprob'] <= minlnprob)
+    goodfits = PDFdata["lnprob"] <= minlnprob
     PDFdata = PDFdata[goodfits]
 
     # return the trimmed list
-    #PDFdata.write(newpdfloc, format='ascii')
+    # PDFdata.write(newpdfloc, format='ascii')
     return PDFdata
