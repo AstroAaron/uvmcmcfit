@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- Author: Shane Bussmann, T. K. Daisy Leung
+ Author: Shane Bussmann, T. K. Daisy Leung, Aaron Beyer, Christof Buchbender
 
 
 Similar to uvmcmcfit.py, but here we edited it to
@@ -10,7 +10,7 @@ Similar to uvmcmcfit.py, but here we edited it to
     - email ourselves once a certain number of samples have been obtained, and so we can decide whether or not to stop sampling instead of interupting the code
 
 
- Last modified: 2016 Dec 15
+ Last modified: 2023 Aug 17
 
  Note: This is experimental software that is in a very active stage of
  development.  If you are interested in using this for your research, please
@@ -669,7 +669,7 @@ def query_yes_no(question, default=None):
 #        sys.stdout.flush()
 
 
-def email_self(msg, receiver='tleung@astro.cornell.edu'):
+def email_self(msg, receiver='beyer@ph1.uni-koeln.de'):
 
     '''
     Parameters
