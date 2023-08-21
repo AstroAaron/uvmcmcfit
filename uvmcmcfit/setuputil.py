@@ -232,7 +232,8 @@ def loadParams(config):
         pzero_model = numpy.zeros((nwalkers, nparams))
         for j in range(nparams):
             # if p3[j] == 'uniform':
-            pzero_model[:, j] = numpy.random.uniform(p1[j], p2[j], nwalkers)
+            rng = numpy.random.default_rng() #not sure about this one
+            pzero_model[:, j] = rng.uniform(p1[j], p2[j], nwalkers) #before was numpy.random.uniform(...)
             # if p3[j] == 'normal':
             #    pzero_model[:,j] = (numpy.random.normal(loc=p1[j],
             #    scale=p2[j], size=nwalkers))
