@@ -10,7 +10,7 @@ Similar to uvmcmcfit.py, but here we edited it to
     - email ourselves once a certain number of samples have been obtained, and so we can decide whether or not to stop sampling instead of interupting the code
 
 
- Last modified: 2023 Aug 17
+ Last modified: 2023 Aug 21
 
  Note: This is experimental software that is in a very active stage of
  development.  If you are interested in using this for your research, please
@@ -87,7 +87,7 @@ import time
 from subprocess import call
 
 import emcee
-import lensutil
+#import lensutil
 import numpy
 import yaml
 from astropy.io import fits
@@ -409,255 +409,7 @@ def lnprob(
 
     return probln, mu
 
-
-configloc = "config.yaml"
-configfile = open(configloc, "r")
-config = yaml.safe_load(configfile)
-
-
-# Determine if we are going to compute the amplification of every model
-if list(config.keys()).count("ComputeAmp") > 0:
-    computeamp = config["ComputeAmp"]
-else:
-    computeamp = True
-
-# Determine parallel processing options
-if list(config.keys()).count("MPI") > 0:
-    mpi = config["MPI"]
-else:
-    mpi = False
-
-# multiple processors on a cluster using MPI
-if mpi:
-    from emcee.utils import MPIPool
-
-    # One thread per slot
-    Nthreads = 1
-
-    # Initialize the pool object
-    pool = MPIPool()
-
-    # If this process is not running as master, wait for instructions, then exit
-    if not pool.is_master():
-        pool.wait()
-        sys.exit(0)
-
-# Single processor with Nthreads cores
-else:
-    if list(config.keys()).count("Nthreads") > 0:
-        # set the number of threads to use for parallel processing
-        Nthreads = config["Nthreads"]
-    else:
-        Nthreads = 1
-
-    # Initialize the pool object
-    pool = ""
-
-# --------------------------------------------------------------------------
-# Read in ALMA image and beam
-# im = fits.getdata(config['ImageName'])
-# im = im[0, 0, :, :].copy()
-headim = fits.getheader(config["ImageName"])
-
-# get resolution in ALMA image
-# celldata = numpy.abs(headim['CDELT1'] * 3600)
-
-# --------------------------------------------------------------------------
-# read in visibility data
-visfile = config["UVData"]
-
-# Determine if we will use miriad to compute simulated visibilities
-if list(config.keys()).count("UseMiriad") > 0:
-    miriad = config["UseMiriad"]
-
-    if miriad:
-        interactive = False
-        index = visfile.index("uvfits")
-        visfilemiriad = visfile[0:index] + "miriad"
-
-        # scale the weights
-        newvisfile = visfile[0:index] + "scaled.uvfits"
-        uvutil.scalewt(visfile, newvisfile)
-        visfile = newvisfile
-    else:
-        miriad = False
-else:
-    miriad = False
-
-# attempt to process multiple visibility files.  This won't work if miriad=True
-try:
-    filetype = visfile[-6:]
-    if filetype == "uvfits":
-        uvfits = True
-    else:
-        uvfits = False
-    uuu, vvv, www = uvutil.uvload(visfile)
-    pcd = uvutil.pcdload(visfile)
-    vis_complex, wgt = uvutil.visload(visfile)
-except:
-    try:
-        for i, ivisfile in enumerate(visfile):
-            filetype = ivisfile[-6:]
-            if filetype == "uvfits":
-                uvfits = True
-            else:
-                uvfits = False
-            iuuu, ivvv, iwww = uvutil.uvload(ivisfile)
-            ipcd = uvutil.pcdload(ivisfile)
-            ivis_complex, iwgt = uvutil.visload(ivisfile)
-            if i == 0:
-                uuu = iuuu
-                vvv = ivvv
-                pcd = ipcd
-                vis_complex = ivis_complex
-                wgt = iwgt
-            else:
-                uuu = numpy.append(uuu, iuuu)
-                vvv = numpy.append(vvv, ivvv)
-                if ipcd != pcd:
-                    data1 = visfile[0]
-                    data2 = visfile[ivisfile]
-                    msg = (
-                        "Phase centers in "
-                        + data1
-                        + " and "
-                        + data2
-                        + " do not match.  Please ensure phase "
-                        + "centers in all visibility datasets are equal."
-                    )
-                    print(msg)
-                    raise TypeError
-                vis_complex = numpy.append(vis_complex, ivis_complex)
-                wgt = numpy.append(wgt, iwgt)
-    except:
-        msg = (
-            "Visibility datasets must be specified as either a string or "
-            "a list of strings."
-        )
-        print(msg)
-        raise TypeError
-
-
-# remove the data points with zero or negative weight
-positive_definite = wgt > 0
-assert (
-    len(positive_definite[positive_definite]) > 0
-), " --- Find no data to fit, check the weights --- "
-vis_complex = vis_complex[positive_definite]
-wgt = wgt[positive_definite]
-uuu = uuu[positive_definite]
-vvv = vvv[positive_definite]
-# www = www[positive_definite]
-
-npos = wgt.size
-
-# ----------------------------------------------------------------------------
-# Load input parameters
-paramSetup = setuputil.loadParams(config)
-nwalkers = paramSetup["nwalkers"]
-nregions = paramSetup["nregions"]
-nparams = paramSetup["nparams"]
-pname = paramSetup["pname"]
-nsource_regions = paramSetup["nsource_regions"]
-
-# Use an intermediate posterior PDF to initialize the walkers if it exists
-posteriorloc = "posteriorpdf.fits"
-if os.path.exists(posteriorloc):
-    # read the latest posterior PDFs
-    print("Found existing posterior PDF file: {:s}".format(posteriorloc))
-    posteriordat = Table.read(posteriorloc)
-    if len(posteriordat) > 1:
-        # assign values to pzero
-        nlnprob = 1
-        pzero = numpy.zeros((nwalkers, nparams))
-        startindx = nlnprob
-        for j in range(nparams):
-            namej = posteriordat.colnames[j + startindx]
-            pzero[:, j] = posteriordat[namej][-nwalkers:]
-
-        # number of mu measurements
-        nmu = len(posteriordat.colnames) - nparams - nlnprob
-
-        # output name is based on most recent burnin file name
-        realpdf = True
-    else:
-        realpdf = False
-else:
-    realpdf = False
-
-if not realpdf:
-    extendedpname = ["lnprob"]
-    extendedpname.extend(pname)
-    nmu = 0
-    for regioni in range(nregions):
-        ri = str(regioni)
-        if paramSetup["nlens_regions"][regioni] > 0:
-            nsource = nsource_regions[regioni]
-            for i in range(nsource):
-                si = ".Source" + str(i) + ".Region" + ri
-                extendedpname.append("mu_tot" + si)
-                nmu += 1
-            for i in range(nsource):
-                si = ".Source" + str(i) + ".Region" + ri
-                extendedpname.append("mu_aper" + si)
-                nmu += 1
-            extendedpname.append("mu_tot.Region" + ri)
-            extendedpname.append("mu_aper.Region" + ri)
-            nmu += 2
-    posteriordat = Table(names=extendedpname)
-    pzero = numpy.array(paramSetup["pzero"])
-
-# make sure no parts of pzero exceed p_u or p_l
-# arrayp_u = numpy.array(p_u)
-# arrayp_l = numpy.array(p_l)
-# for j in range(nwalkers):
-#    exceed = arraypzero[j] >= arrayp_u
-#    arraypzero[j, exceed] = 2 * arrayp_u[exceed] - arraypzero[j, exceed]
-#    exceed = arraypzero[j] <= arrayp_l
-#    arraypzero[j, exceed] = 2 * arrayp_l[exceed] - arraypzero[j, exceed]
-# pzero = arraypzero
-# p_u = arrayp_u
-# p_l = arrayp_l
-
-# determine the indices for fixed parameters
-fixindx = setuputil.fixParams(paramSetup)
-fixindx = list(map(int, fixindx))
-
-# Initialize the sampler with the chosen specs.
-if mpi:
-    sampler = emcee.EnsembleSampler(
-        nwalkers,
-        nparams,
-        lnprob,
-        pool=pool,
-        args=[vis_complex, wgt, uuu, vvv, pcd, fixindx, paramSetup, computeamp, miriad],
-    )
-else:
-    sampler = emcee.EnsembleSampler(
-        nwalkers,
-        nparams,
-        lnprob,
-        args=[vis_complex, wgt, uuu, vvv, pcd, fixindx, paramSetup, computeamp, miriad],
-        threads=Nthreads,
-    )
-
-# Sample, outputting to a file
-# os.system('date')
-currenttime = time.time()
-
-# do burn-in if posteriorpdf.fits doesn't exist or contains any samples
-# But, it's difficult to judge how many steps is needed
-# need to may sure later that we are sampling longer than the AC time
-if not realpdf:
-    burnin = 150
-    print("*** Running Burn in phase of steps {:d} ***".format(burnin))
-    try:
-        pos0, lnprob0, rstate0 = sampler.run_mcmc(pzero, burnin)
-    except ValueError:
-        pos0, lnprob0, rstate0, _ = sampler.run_mcmc(pzero, burnin)
-    sampler.reset()  # reset chain
-else:
-    pos0 = pzero
+#######################################
 
 
 class AlarmException(Exception):
@@ -747,117 +499,374 @@ def email_self(msg, receiver="beyer@ph1.uni-koeln.de"):
         print("Sendmail exit status {}".format(sts))
 
 
-import os
-import pickle as pickle
 
-# pos - A list of current positions of walkers in the parameter space; dim = (nwalkers, dim)
-# prob - The list of log posterior probabilities for the walkers at positions given by pos . The shape of this object is (nwalkers, dim).
-# state - the random number generator state
-# amp - metadata 'blobs' associated with the current positon
-
-# below for testing..
-# nsamples = 1000
-# nsessions = 2
-
-# in general, we want many samples.
-# niter & nsesions dep. on nwalkers
-#
-nsamples = 1e6
-niter = int(round(nsamples / nwalkers))
-nsessions = 10
-saveint = niter / nsessions / 3
-
-valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
-
-for i in range(nsessions):
-    saveidx = 0
-    for pos, prob, state, amp in sampler.sample(
-        pos0, iterations=int(niter / nsessions)
-    ):
-        # using sampler.sample() will have pre-defined 0s in elements (cf. run_mcmc())
-        walkers, steps, dim = sampler.chain.shape
-        result = [
-            "Mean Acceptance fraction across all walkers of this iteration: {:.2f}".format(
-                numpy.mean(sampler.acceptance_fraction)
-            ),
-            "Mean lnprob and Max lnprob values: {:f} {:f}".format(
-                numpy.mean(prob), numpy.max(prob)
-            ),
-            "Time to run previous set of walkers (seconds): {:f}".format(
-                time.time() - currenttime
-            ),
-        ]
-        print("\n".join(result))
-        f = open("summary.txt", "a")
-        f.write("\n".join(result))
-        f.write("\n")
-        f.close()
-
-        currenttime = time.time()
-        # ff.write(str(prob))
-
-        superpos = numpy.zeros(1 + nparams + nmu)
-        for wi in range(nwalkers):
-            superpos[0] = prob[wi]
-            superpos[1 : nparams + 1] = pos[wi]
-            superpos[nparams + 1 : nparams + nmu + 1] = amp[wi]
-            posteriordat.add_row(superpos)
-
-        # only save if it has went through every saveint iterations or is the last sample
-        if not sampler.chain[
-            :, numpy.any(sampler.chain[0, :, :] != 0, axis=1), :
-        ].shape[1] % saveint or (
-            sampler.chain[:, numpy.any(sampler.chain[0, :, :] != 0, axis=1), :].shape[1]
-            == int(niter / nsessions)
-        ):
-            print(
-                "Ran {:d} iterations in this session. Saving data".format(
-                    sampler.chain[
-                        :, numpy.any(sampler.chain[0, :, :] != 0, axis=1), :
-                    ].shape[1]
-                )
+def main():
+    
+    
+    configloc = "config.yaml"
+    configfile = open(configloc, "r")
+    config = yaml.safe_load(configfile)
+    
+    
+    # Determine if we are going to compute the amplification of every model
+    if list(config.keys()).count("ComputeAmp") > 0:
+        computeamp = config["ComputeAmp"]
+    else:
+        computeamp = True
+    
+    # Determine parallel processing options
+    if list(config.keys()).count("MPI") > 0:
+        mpi = config["MPI"]
+    else:
+        mpi = False
+    
+    # multiple processors on a cluster using MPI
+    if mpi:
+        from emcee.utils import MPIPool
+    
+        # One thread per slot
+        Nthreads = 1
+    
+        # Initialize the pool object
+        pool = MPIPool()
+    
+        # If this process is not running as master, wait for instructions, then exit
+        if not pool.is_master():
+            pool.wait()
+            sys.exit(0)
+    
+    # Single processor with Nthreads cores
+    else:
+        if list(config.keys()).count("Nthreads") > 0:
+            # set the number of threads to use for parallel processing
+            Nthreads = config["Nthreads"]
+        else:
+            Nthreads = 1
+    
+        # Initialize the pool object
+        #pool = ""
+    
+    # --------------------------------------------------------------------------
+    # Read in ALMA image and beam
+    # im = fits.getdata(config['ImageName'])
+    # im = im[0, 0, :, :].copy()
+    headim = fits.getheader(config["ImageName"])
+    
+    # get resolution in ALMA image
+    # celldata = numpy.abs(headim['CDELT1'] * 3600)
+    
+    # --------------------------------------------------------------------------
+    # read in visibility data
+    visfile = config["UVData"]
+    
+    # Determine if we will use miriad to compute simulated visibilities
+    if list(config.keys()).count("UseMiriad") > 0:
+        miriad = config["UseMiriad"]
+    
+        if miriad:
+            interactive = False
+            index = visfile.index("uvfits")
+            visfilemiriad = visfile[0:index] + "miriad"
+    
+            # scale the weights
+            newvisfile = visfile[0:index] + "scaled.uvfits"
+            uvutil.scalewt(visfile, newvisfile)
+            visfile = newvisfile
+        else:
+            miriad = False
+    else:
+        miriad = False
+    
+    # attempt to process multiple visibility files.  This won't work if miriad=True
+    try:
+        filetype = visfile[-6:]
+        if filetype == "uvfits":
+            uvfits = True
+        else:
+            uvfits = False
+        uuu, vvv, www = uvutil.uvload(visfile)
+        pcd = uvutil.pcdload(visfile)
+        vis_complex, wgt = uvutil.visload(visfile)
+    except:
+        try:
+            for i, ivisfile in enumerate(visfile):
+                filetype = ivisfile[-6:]
+                if filetype == "uvfits":
+                    uvfits = True
+                else:
+                    uvfits = False
+                iuuu, ivvv, iwww = uvutil.uvload(ivisfile)
+                ipcd = uvutil.pcdload(ivisfile)
+                ivis_complex, iwgt = uvutil.visload(ivisfile)
+                if i == 0:
+                    uuu = iuuu
+                    vvv = ivvv
+                    pcd = ipcd
+                    vis_complex = ivis_complex
+                    wgt = iwgt
+                else:
+                    uuu = numpy.append(uuu, iuuu)
+                    vvv = numpy.append(vvv, ivvv)
+                    if ipcd != pcd:
+                        data1 = visfile[0]
+                        data2 = visfile[ivisfile]
+                        msg = (
+                            "Phase centers in "
+                            + data1
+                            + " and "
+                            + data2
+                            + " do not match.  Please ensure phase "
+                            + "centers in all visibility datasets are equal."
+                        )
+                        print(msg)
+                        raise TypeError
+                    vis_complex = numpy.append(vis_complex, ivis_complex)
+                    wgt = numpy.append(wgt, iwgt)
+        except:
+            msg = (
+                "Visibility datasets must be specified as either a string or "
+                "a list of strings."
             )
-            posteriordat.write("posteriorpdf.fits", overwrite=True)
-            # posteriordat.write('posteriorpdf.txt', format='ascii')
+            print(msg)
+            raise TypeError
+    
+    
+    # remove the data points with zero or negative weight
+    positive_definite = wgt > 0
+    assert (
+        len(positive_definite[positive_definite]) > 0
+    ), " --- Find no data to fit, check the weights --- "
+    vis_complex = vis_complex[positive_definite]
+    wgt = wgt[positive_definite]
+    uuu = uuu[positive_definite]
+    vvv = vvv[positive_definite]
+    # www = www[positive_definite]
+    
+    npos = wgt.size
+    
+    # ----------------------------------------------------------------------------
+    # Load input parameters
+    paramSetup = setuputil.loadParams(config)
+    nwalkers = paramSetup["nwalkers"]
+    nregions = paramSetup["nregions"]
+    nparams = paramSetup["nparams"]
+    pname = paramSetup["pname"]
+    nsource_regions = paramSetup["nsource_regions"]
+    
+    # Use an intermediate posterior PDF to initialize the walkers if it exists
+    posteriorloc = "posteriorpdf.fits"
+    if os.path.exists(posteriorloc):
+        # read the latest posterior PDFs
+        print("Found existing posterior PDF file: {:s}".format(posteriorloc))
+        posteriordat = Table.read(posteriorloc)
+        if len(posteriordat) > 1:
+            # assign values to pzero
+            nlnprob = 1
+            pzero = numpy.zeros((nwalkers, nparams))
+            startindx = nlnprob
+            for j in range(nparams):
+                namej = posteriordat.colnames[j + startindx]
+                pzero[:, j] = posteriordat[namej][-nwalkers:]
+    
+            # number of mu measurements
+            nmu = len(posteriordat.colnames) - nparams - nlnprob
+    
+            # output name is based on most recent burnin file name
+            realpdf = True
+        else:
+            realpdf = False
+    else:
+        realpdf = False
+    
+    if not realpdf:
+        extendedpname = ["lnprob"]
+        extendedpname.extend(pname)
+        nmu = 0
+        for regioni in range(nregions):
+            ri = str(regioni)
+            if paramSetup["nlens_regions"][regioni] > 0:
+                nsource = nsource_regions[regioni]
+                for i in range(nsource):
+                    si = ".Source" + str(i) + ".Region" + ri
+                    extendedpname.append("mu_tot" + si)
+                    nmu += 1
+                for i in range(nsource):
+                    si = ".Source" + str(i) + ".Region" + ri
+                    extendedpname.append("mu_aper" + si)
+                    nmu += 1
+                extendedpname.append("mu_tot.Region" + ri)
+                extendedpname.append("mu_aper.Region" + ri)
+                nmu += 2
+        posteriordat = Table(names=extendedpname)
+        pzero = numpy.array(paramSetup["pzero"])
+    
+    # make sure no parts of pzero exceed p_u or p_l
+    # arrayp_u = numpy.array(p_u)
+    # arrayp_l = numpy.array(p_l)
+    # for j in range(nwalkers):
+    #    exceed = arraypzero[j] >= arrayp_u
+    #    arraypzero[j, exceed] = 2 * arrayp_u[exceed] - arraypzero[j, exceed]
+    #    exceed = arraypzero[j] <= arrayp_l
+    #    arraypzero[j, exceed] = 2 * arrayp_l[exceed] - arraypzero[j, exceed]
+    # pzero = arraypzero
+    # p_u = arrayp_u
+    # p_l = arrayp_l
+    
+    # determine the indices for fixed parameters
+    fixindx = setuputil.fixParams(paramSetup)
+    fixindx = list(map(int, fixindx))
+    
+    # Initialize the sampler with the chosen specs.
+    if mpi:
+        sampler = emcee.EnsembleSampler(
+            nwalkers,
+            nparams,
+            lnprob,
+            pool=pool,
+            args=[vis_complex, wgt, uuu, vvv, pcd, fixindx, paramSetup, computeamp, miriad],
+        )
+    else:
+        sampler = emcee.EnsembleSampler(
+            nwalkers,
+            nparams,
+            lnprob,
+            args=[vis_complex, wgt, uuu, vvv, pcd, fixindx, paramSetup, computeamp, miriad],
+            threads=Nthreads,
+        )
+    
+    # Sample, outputting to a file
+    # os.system('date')
+    currenttime = time.time()
+    
+    # do burn-in if posteriorpdf.fits doesn't exist or contains any samples
+    # But, it's difficult to judge how many steps is needed
+    # need to may sure later that we are sampling longer than the AC time
+    if not realpdf:
+        burnin = 150
+        print("*** Running Burn in phase of steps {:d} ***".format(burnin))
+        try:
+            pos0, lnprob0, rstate0 = sampler.run_mcmc(pzero, burnin)
+            currenttime = time.time()
+        except ValueError:
+            pos0, lnprob0, rstate0, _ = sampler.run_mcmc(pzero, burnin)
+        sampler.reset()  # reset chain
+    else:
+        pos0 = pzero
 
-            saveidx = sampler.chain[
+    import pickle as pickle
+
+    # pos - A list of current positions of walkers in the parameter space; dim = (nwalkers, dim)
+    # prob - The list of log posterior probabilities for the walkers at positions given by pos . The shape of this object is (nwalkers, dim).
+    # state - the random number generator state
+    # amp - metadata 'blobs' associated with the current positon
+
+    # below for testing..
+    #nsamples = 5
+    #nsessions = 2
+
+    # in general, we want many samples.
+    # niter & nsesions dep. on nwalkers
+    #
+    nsamples = 1e6
+    niter = int(round(nsamples / nwalkers))
+    nsessions = 10
+    saveint = niter / nsessions / 3
+
+    valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
+
+    for i in range(nsessions):
+        saveidx = 0
+        for pos, prob, state, amp in sampler.sample(
+            pos0, iterations=int(niter / nsessions)
+        ):
+            # using sampler.sample() will have pre-defined 0s in elements (cf. run_mcmc())
+            print(currenttime)
+            walkers, steps, dim = sampler.chain.shape
+            result = [
+                "Mean Acceptance fraction across all walkers of this iteration: {:.2f}".format(
+                    numpy.mean(sampler.acceptance_fraction)
+                ),
+                "Mean lnprob and Max lnprob values: {:f} {:f}".format(
+                    numpy.mean(prob), numpy.max(prob)
+                ),
+                "Time to run previous set of walkers (seconds): {:f}".format(
+                    time.time() - currenttime
+                ),
+            ]
+            print("\n".join(result))
+            f = open("summary.txt", "a")
+            f.write("\n".join(result))
+            f.write("\n")
+            f.close()
+
+            currenttime = time.time()
+            # ff.write(str(prob))
+
+            superpos = numpy.zeros(1 + nparams + nmu)
+            for wi in range(nwalkers):
+                superpos[0] = prob[wi]
+                superpos[1 : nparams + 1] = pos[wi]
+                superpos[nparams + 1 : nparams + nmu + 1] = amp[wi]
+                posteriordat.add_row(superpos)
+
+            # only save if it has went through every saveint iterations or is the last sample
+            if not sampler.chain[
                 :, numpy.any(sampler.chain[0, :, :] != 0, axis=1), :
-            ].shape[1]
+            ].shape[1] % saveint or (
+                sampler.chain[:, numpy.any(sampler.chain[0, :, :] != 0, axis=1), :].shape[1]
+                == int(niter / nsessions)
+            ):
+                print(
+                    "Ran {:d} iterations in this session. Saving data".format(
+                        sampler.chain[
+                            :, numpy.any(sampler.chain[0, :, :] != 0, axis=1), :
+                        ].shape[1]
+                    )
+                )
+                posteriordat.write("posteriorpdf.fits", overwrite=True)
+                # posteriordat.write('posteriorpdf.txt', format='ascii')
 
-    message = "We have finished {:d} iterations with {:d} walkers. ".format(
-        sampler.chain[:, numpy.any(sampler.chain[0, :, :] != 0, axis=1), :].shape[1],
-        nwalkers,
-    )
+                saveidx = sampler.chain[
+                    :, numpy.any(sampler.chain[0, :, :] != 0, axis=1), :
+                ].shape[1]
 
-    if i < nsessions - 1:
-        email_self(message)
-        print(message)
-        ret = nonBlockingRawInput(
-            "Shall we continuue with next session? (Y/N)", timeout=600
-        ).lower()
+        message = "We have finished {:d} iterations with {:d} walkers. ".format(
+            sampler.chain[:, numpy.any(sampler.chain[0, :, :] != 0, axis=1), :].shape[1],
+            nwalkers,
+        )
 
-        while not ret in valid:
-            print("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
+        if i < nsessions - 1:
+            email_self(message)
+            print(message)
             ret = nonBlockingRawInput(
                 "Shall we continuue with next session? (Y/N)", timeout=600
             ).lower()
-        if not valid[ret]:
-            import sys
 
-            sys.exit("Quiting... ")
-            if mpi:
-                pool.close()
+            while not ret in valid:
+                print("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
+                ret = nonBlockingRawInput(
+                    "Shall we continuue with next session? (Y/N)", timeout=600
+                ).lower()
+            if not valid[ret]:
+                import sys
 
-    sampler.reset()
-    pos0 = pos
+                sys.exit("Quiting... ")
+                if mpi:
+                    pool.close()
 
-f = open("summary.txt", "a")
-f.write("Finish all {:d} sessions \n".format(nsessions))
-f.write(
-    "Total number of samples: {:d} \n".format(niter / nsessions * nsessions * nwalkers)
-)
-f.write("\n")
-f.close()
+        sampler.reset()
+        pos0 = pos
 
-if mpi:
-    pool.close()
+    f = open("summary.txt", "a")
+    f.write("Finish all {:d} sessions \n".format(nsessions))
+    f.write(
+        "Total number of samples: {:d} \n".format(niter / nsessions * nsessions * nwalkers)
+    )
+    f.write("\n")
+    f.close()
+
+    if mpi:
+        pool.close()
+        
+if __name__ == "__main__":
+    main()
