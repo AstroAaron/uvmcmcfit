@@ -84,6 +84,7 @@ import os
 import os.path
 import sys
 import time
+from tqdm import tqdm
 from subprocess import call
 
 import emcee
@@ -774,7 +775,7 @@ def main():
 
     valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
 
-    for i in range(nsessions):
+    for i in tqdm(range(nsessions)):
         saveidx = 0
         for pos, prob, state, amp in sampler.sample(
             pos0, iterations=int(niter / nsessions)
