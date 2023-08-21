@@ -95,7 +95,7 @@ from astropy.table import Table
 
 # import pyximport
 # pyximport.install(setup_args={"include_dirs":numpy.get_include()})
-from . import sample_vis, setuputil, uvutil
+from . import lensutil, sample_vis, setuputil, uvutil
 
 # cwd = os.getcwd()
 # sys.path.append(cwd)
