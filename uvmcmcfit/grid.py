@@ -510,7 +510,7 @@ def spheroid(eta, m, alpha, p, q):
     ndenom = [3, 2, 3, 3, 3]
 
     # checks and balances
-    twoalp = numpy.int(numpy.round(2.0 * alpha))
+    twoalp = numpy.int64(numpy.round(2.0 * alpha))
     if numpy.abs(eta) > 1:
         print("Abs(ETA) exceeds 1: {:f}".format(eta))
     if (twoalp < 0) or (twoalp > 4):
@@ -544,7 +544,7 @@ def spheroid(eta, m, alpha, p, q):
 def gcffun(n, width, alpha):
     ppp, qqq = getspherewave()
     phi = numpy.zeros(n)
-    j = numpy.int(numpy.round(2.0 * alpha))
+    j = numpy.int64(numpy.round(2.0 * alpha))
     p = 0.5 * j
     if j == 0:
         for i in numpy.arange(n):
@@ -562,7 +562,7 @@ def corrfun(n, width, alpha):
     ppp, qqq = getspherewave()
     phi = numpy.zeros(n)
     dx = 2.0 / n
-    i0 = numpy.int(n) // 2 + 1
+    i0 = numpy.int64(n) // 2 + 1
     for i in range(n):
         x = (i + 1 - i0) * dx
         phi[i] = spheroid(x, width, alpha, ppp, qqq)
@@ -580,7 +580,7 @@ def ModCorr(nxd, nyd):
     # ycorr1 = numpy.zeros(nyd)
 
     data = corrfun(nxd, width, 1.0)
-    offset = numpy.int(nxd) // 2
+    offset = numpy.int64(nxd) // 2
     indx = numpy.arange(nxd // 2)
     ix = indx.astype(int)
     xcorr[ix] = data[ix + offset]
@@ -593,7 +593,7 @@ def ModCorr(nxd, nyd):
     #    xcorr1[i] = data[i - offset]
 
     data = corrfun(nyd, width, 1.0)
-    offset = numpy.int(nyd) // 2
+    offset = numpy.int64(nyd) // 2
     indx = numpy.arange(0, nyd // 2, 2)
     ycorr[indx] = data[indx + offset]
     indx = numpy.arange(0, nyd // 2, 2)
