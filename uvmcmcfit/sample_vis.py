@@ -20,7 +20,7 @@ Ported from an IDL routine of the same name from Katherine Rosenfeld
 # import pyfits
 # import math
 # import ModGrid
-import grid
+from . import grid
 import numpy as np
 
 # cimport np
@@ -375,7 +375,7 @@ def uvmodel(model, modelheader, u, v, pcd):
         u0 = nxd // 2 + 1  # - central u cell id
         # v0 = nyd // 2 + 1		# - central v cell id
         mu = np.arange(nxd)
-        u0int = np.int64u0)
+        u0int = np.int64(u0)
         mu[u0int:] = u0int - nxd + np.arange(u0int - 2)
         mu1d = du * mu
         import time
