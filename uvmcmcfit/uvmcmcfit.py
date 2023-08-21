@@ -743,7 +743,7 @@ def main():
     # But, it's difficult to judge how many steps is needed
     # need to may sure later that we are sampling longer than the AC time
     if not realpdf:
-        burnin = 15
+        burnin = 150
         print("*** Running Burn in phase of steps {:d} ***".format(burnin))
         try:
             pos0, lnprob0, rstate0 = sampler.run_mcmc(pzero, burnin)
@@ -762,15 +762,15 @@ def main():
     # amp - metadata 'blobs' associated with the current positon
 
     # below for testing..
-    nsamples = 300
-    nsessions = 2
+    #nsamples = 300
+    #nsessions = 2
 
     # in general, we want many samples.
     # niter & nsesions dep. on nwalkers
     #
-    #nsamples = 1e6
+    nsamples = 1e6
     niter = int(round(nsamples / nwalkers))
-    #nsessions = 10
+    nsessions = 15 #was 10
     saveint = niter / nsessions / 3
 
     valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
