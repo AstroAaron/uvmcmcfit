@@ -27,6 +27,12 @@ To be able to run visualize.convergence() and visualize.bestFit() need a bit of 
 	Do this for the environment you are working from. Your python3 versions might different.
 	This is so yaml, emcee, uvmcmcfit and other packages are found by CASA. Replace "[your-user]" with your username and correspondingly the path where uvmcmcfit.py lies.
 	
+	Then open Casa:
+	import visualize
+	visualize.convergence()
+	visualize.bestFit()
+	
+	(Order not important)
 	
 """
 
