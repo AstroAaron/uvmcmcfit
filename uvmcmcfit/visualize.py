@@ -1,6 +1,6 @@
 """
 
-Authors: Shane Bussmann & Daisy Leung
+Authors: Shane Bussmann & Daisy Leung  
 
 A number of visualization tools are included here to aid the user in evaluating
 the:
@@ -11,7 +11,23 @@ the:
     the covariance matrix for the posterior PDFs
     the best-fit model
     a number of randomly drawn realizations from the posterior PDFs
-
+    
+To be able to run visualize.convergence() and visualize.bestFit() need a bit of set-up:
+	Not all of this might apply to you but this worked for me:
+	- in .casa directory create startup.py file (if not there already) and write in it:
+	import site
+	# python
+	site.addsitedir("~/anaconda3/envs/"[your-env]"/lib/python3.9/site-packages")
+	# python
+	site.addsitedir("/home/"[your-user]"/.local/lib/python3.6/site-packages")
+	# python
+	site.addsitedir("/home/"[your-user]"/"[path-where-uvmcmcfit.py-is-located]"")
+	from tqdm import tqdm
+	
+	Do this for the environment you are working from. Your python3 versions might different.
+	This is so yaml, emcee, uvmcmcfit and other packages are found by CASA. Replace "[your-user]" with your username and correspondingly the path where uvmcmcfit.py lies.
+	
+	
 """
 
 
