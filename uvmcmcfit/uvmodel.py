@@ -22,7 +22,7 @@ from astropy.io import fits
 
 # import pyximport
 # pyximport.install(setup_args={"include_dirs":numpy.get_include()})
-from . import sample_vis, uvutil
+import sample_vis, uvutil
 
 # import time
 
@@ -39,7 +39,7 @@ def writeVis(vis_complex, visdataloc, modelvisloc, miriad=False):
 
     miriad: Boolean
         True: not using CASA, just python data manipulation, hence can run in ipython,
-        False: use CASA taskinit module, must run inside CASA
+        False: use CASA taskinit module, must run inside CASA #deprecated CASA6 doesnt have taskinit anymore. Use from casatools import table /n tb= table() / from casatools import ms
 
 
     Returns
@@ -93,11 +93,11 @@ def writeVis(vis_complex, visdataloc, modelvisloc, miriad=False):
         visfile.flush()
 
     else:
-        from taskinit import tb
+        from casatools import table
+        tb = table()
 
         print("Writing visibility data to " + modelvisloc)
         os.system("rm -rf " + modelvisloc)
-        tb.close()
         lock_options = {"option": "auto"}
         tb.open(visdataloc, lockoptions=lock_options)
         tb.copy(modelvisloc)

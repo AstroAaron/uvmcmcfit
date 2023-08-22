@@ -25,7 +25,7 @@ import pickle as pickle
 import yaml
 from astropy.io import fits
 
-from . import visualutil
+import visualutil
 
 configloc = "config.yaml"
 configfile = open(configloc)

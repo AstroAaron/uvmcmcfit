@@ -307,7 +307,7 @@ def makeMask(config):
     yr1 = 3 * ny / 4
     xr0 = nx / 4
     xr1 = 3 * nx / 4
-    mask[yr0:yr1, xr0:xr1] = 0
+    mask[numpy.int64(yr0):numpy.int64(yr1), numpy.int64(xr0):numpy.int64(xr1)] = 0 #changed to make the floats into ints
 
     # determine the number of regions for which we need surface brightness maps
     configkeys = list(config.keys())
@@ -327,5 +327,5 @@ def makeMask(config):
         xm1 = x_center + pixextent / 2
         ym0 = y_center - pixextent / 2
         ym1 = y_center + pixextent / 2
-        mask[ym0:ym1, xm0:xm1] = 2
+        mask[numpy.int64(ym0):numpy.int64(ym1), numpy.int64(xm0):numpy.int64(xm1)] = 2 #changed to make the floats into ints
     return mask

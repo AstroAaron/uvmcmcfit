@@ -67,7 +67,8 @@ def MSpcd(msFile):
     which method gives the phase center that correspond to that used in CASA imaging needs further investigation
     """
 
-    from taskinit import tb
+    from casatools import table
+    tb = table()
 
     tb.open(msFile + "/FIELD")
     old = tb.getcol("DELAY_DIR")  # , fieldid
@@ -115,7 +116,7 @@ def MSpcd(msFile):
 
 
 def MSpcd2(msFile):
-    """using CASA taskinit.ms
+    """using CASA taskinit.ms #deprecated: Using now from casatools import ms
 
     Parameters
     ----------
@@ -134,7 +135,7 @@ def MSpcd2(msFile):
     (need further investigation)
     """
 
-    from taskinit import ms
+    from casatools import ms
 
     ms.open(msFile)
     pc = ms.getfielddirmeas()
@@ -172,7 +173,8 @@ def oldMSpcd(msFile):
     the following will give the old phase center otherwise
     """
 
-    from taskinit import tb
+    from casatools import table
+    tb = table()
 
     tb.open(msFile + "/SOURCE")
     pcd_ra = tb.getcol("DIRECTION")[0][0] * 180 / numpy.pi
@@ -325,8 +327,9 @@ def uvload(visfile):
                     ww[:, ipol] = freqif * visibilities["WW"]
 
     else:
-        from taskinit import tb
-
+        from casatools import table 
+        tb = table()
+	
         # read in the uvfits data
         tb.open(visfile)
         uvw = tb.getcol("UVW")
@@ -406,7 +409,8 @@ def visload(visfile):
         data_complex = numpy.array(data_real) + 1j * numpy.array(data_imag)
 
     else:
-        from taskinit import tb
+        from casatools import table
+        tb = table()
 
         # read in the CASA MS
         tb.open(visfile)
@@ -717,7 +721,9 @@ def getFreqfromtb(msFile):
         reference frequency in Hz
     """
 
-    from taskinit import tb
+    from casatools import table
+    tb = table()
+    
 
     tb.open(msFile + "/SPECTRAL_WINDOW")
     freq0 = tb.getcol("REF_FREQUENCY")
@@ -743,7 +749,7 @@ def checkMS(msFile, cont=True):
         number of channels
 
     """
-    from taskinit import ms
+    from casatools import ms
 
     ms.open(msFile)
     metadata = ms.metadata()

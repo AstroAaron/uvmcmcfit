@@ -20,7 +20,12 @@ Ported from an IDL routine of the same name from Katherine Rosenfeld
 # import pyfits
 # import math
 # import ModGrid
-from . import grid
+CASA6 = False
+try:
+	from . import grid #casa cant import this way but we need to import it this way to run mcmcsampling (uvmcmcfit)
+except ImportError or ModuleNotFoundError:
+	import grid
+	CASA6 = True #not used yet.
 import numpy as np
 
 # cimport np

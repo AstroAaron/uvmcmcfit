@@ -407,18 +407,19 @@ def makeVis(config, miriad=False, idtag=""):
 
             # check to see if the CASA ms exists
             try:
-                from taskinit import tb
+                from casatools import table #changed from "from taskinit import tb"
+                tb = table()
 
                 tb.open(visname + tag)
                 tb.close()
                 print("Found an existing CASA ms file.")
-            except RuntimeError:
+            except RuntimeError: #from RuntimeError
                 print(
                     "No CASA ms file found, creating one from "
                     + visname
                     + ".uvfits file."
                 )
-                from casa import importuvfits
+                from casatasks import importuvfits #changed from "#from casatools import importuvfits"
 
                 infile = visname + ".uvfits"
                 outfile = visname + ".ms"
@@ -485,7 +486,8 @@ def makeVis(config, miriad=False, idtag=""):
 
             # check to see if the CASA ms exists
             try:
-                from taskinit import tb
+                from casatools import table
+                tb = table()
 
                 tb.open(visname + tag)
                 tb.close()
@@ -496,7 +498,7 @@ def makeVis(config, miriad=False, idtag=""):
                     + visname
                     + ".uvfits file."
                 )
-                from casa import importuvfits
+                from casatasks import importuvfits
 
                 infile = visname + ".uvfits"
                 outfile = visname + ".ms"
@@ -580,7 +582,7 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=""):
 
     import miriadutil
     from astropy.io import fits
-    from rmtables import rmtables
+    from casatasks import rmtables
 
     visfile = config["UVData"]
     target = config["ObjectName"]
@@ -739,7 +741,7 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=""):
 
     else:
         # use CASA for imaging
-        from casa import exportfits, tclean
+        from casatasks import exportfits, tclean
 
         # ---------------------------------------
         # invert and clean the model visibilities
@@ -778,19 +780,7 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=""):
         # use CASA's clean task to make the images
         print("")
         print("*** CLEANING with the following options: *** \n")
-        print(
-            (
-                "vis={:s}, imagename={:s}, specmode='mfs', niters=10000, threshold={:s} mJy, interactive={:}, mask={:s}, imsize={:s},cell={:s},weighting='briggs',robust=0.5"
-            ).format(
-                modelvisloc,
-                imloc + ".image",
-                threshold,
-                interactive,
-                mask,
-                imsize,
-                cell,
-            )
-        )
+        print("vis={}, imagename={}, specmode='mfs', niters=10000, threshold={} mJy, interactive={}, mask={}, imsize={},cell={},weighting='briggs',robust=0.0".format(modelvisloc,imloc + ".image",threshold,interactive,mask,imsize,cell))
 
         tclean(
             vis=modelvisloc,
@@ -803,7 +793,7 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=""):
             imsize=imsize,
             cell=cell,
             weighting="briggs",
-            robust=0.5,
+            robust=0.0, #from 0.5
         )
 
         # export the cleaned image to a fits file
@@ -1047,7 +1037,7 @@ def plotImage(model, data, config, modeltype, fitresult, tag=""):
     totdx2 = x0 + imradx
     totdy1 = y0 - imrady
     totdy2 = y0 + imrady
-    datacut = im[totdy1:totdy2, totdx1:totdx2]
+    datacut = im[numpy.int64(totdy1):numpy.int64(totdy2), numpy.int64(totdx1):numpy.int64(totdx2)] #changed from nothing to numpy.int64
 
     # make cleaned model cutout
     headerkeys = list(headmod.keys())
@@ -1086,7 +1076,7 @@ def plotImage(model, data, config, modeltype, fitresult, tag=""):
     totdx2 = x0 + modradx
     totdy1 = y0 - modrady
     totdy2 = y0 + modrady
-    modelcut = im_model[totdy1:totdy2, totdx1:totdx2]
+    modelcut = im_model[numpy.int64(totdy1):numpy.int64(totdy2), numpy.int64(totdx1):numpy.int64(totdx2)] #changed from nothing to numpy int64
 
     # cellp = cell * (2 * pixextent + 1.1) / (2 * pixextent)
     xlo = -radialextent
