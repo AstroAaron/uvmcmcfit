@@ -768,6 +768,9 @@ def main():
     # in general, we want many samples.
     # niter & nsesions dep. on nwalkers
     #
+    ####################################################
+    #The saveint number has to be an integer, so choose the nsamples and nwalkers so that niter /nsessions/3 is equal to an integer and larger than 1, otherwise it will not save.
+    ####################################################
     nsamples = 1e6
     niter = int(round(nsamples / nwalkers))
     nsessions = 15 #was 10
