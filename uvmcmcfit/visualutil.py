@@ -42,11 +42,11 @@ def reconstruct_chain(
     config = yaml.safe_load(configfile)
 
     nwalkers = config["Nwalkers"]
-    nsteps = len(pdf) / nwalkers
+    nsteps = len(pdf) // nwalkers
     ndim = len(fitKeys)
     assert isinstance(
-        nsteps, int
-    ), "the total number of sameples should be nsteps x nwalkers"
+        nsteps, int 
+    ), "the total number of samples should be nsteps x nwalkers"
 
     chains = numpy.empty([nwalkers, nsteps, ndim])
     for ii, param in enumerate(fitKeys):
@@ -173,7 +173,7 @@ def plotPDF(fitresults, tag, limits="", Ngood=5000, axes="auto"):
 
     # intialize a dictionary w/ keywords = pnames to hold the average value of each paramter in the chain
     avg_dic = dict.fromkeys(pnames)
-
+    print(enumerate(pnames))
     for i, pname in enumerate(pnames):
         ax = plt.subplot(
             nrow,
@@ -209,8 +209,8 @@ def plotPDF(fitresults, tag, limits="", Ngood=5000, axes="auto"):
                 else:
                     p_l = limits[0]
                     p_u = limits[1]
-                    xmin = p_l[i]
-                    xmax = p_u[i]
+                    xmin = p_l[i-1] #bug: IndexError: index 11 is out of bounds for axis 0 with size 11. was p_l[i]. changed to p_l[i-1]
+                    xmax = p_u[i-1]
                 ymin = oldaxis[2]
                 ymax = oldaxis[3]
                 plt.axis([xmin, xmax, ymin, ymax])
@@ -832,7 +832,7 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=""):
             imsize=imsize,
             cell=cell,
             weighting="briggs",
-            robust=0.5,
+            robust=0.0,
         )
 
         # export the cleaned image to a fits file
@@ -1323,6 +1323,7 @@ def removeTempFiles():
 
     cmd = "rm -rf *SBmap*fits *_model* *_residual* *output.txt"
     os.system(cmd)
+    
 
 
 def plotFit(
