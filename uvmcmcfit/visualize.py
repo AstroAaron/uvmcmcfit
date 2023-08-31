@@ -231,7 +231,7 @@ def walker_reconstructed(
             nbins = nbins if nbins > 0 else 10
 
             ax1 = plt.subplot(gs[counter_gs, :2])
-            ax1.set_axis_bgcolor("#333333")
+            ax1.set_facecolor("#333333")
             ax1.axvline(0, color="#67A9CF", alpha=0.7, linewidth=2)
 
             # plot trace for nw walkers
@@ -266,7 +266,7 @@ def walker_reconstructed(
 
             # histograms
             ax2 = plt.subplot(gs[counter_gs, 2])
-            ax2.set_axis_bgcolor("#555555")
+            ax2.set_facecolor("#555555")
             # Create a histogram of all values past converged_idx. Make 100 bins
             #   between the y-axis bounds defined by the 'walkers' plot.
             ax2.hist(
