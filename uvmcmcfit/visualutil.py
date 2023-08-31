@@ -76,7 +76,7 @@ def test_reconstruct_chain(bestfitloc="posteriorpdf.fits", chainFile="chain.pkl"
     """
     import pickle as pickle
 
-    with open(chainFile) as f:
+    with open(chainFile, "rb") as f:
         chain = pickle.load(f)
 
     reconstructed = reconstruct_chain(bestfitloc)
@@ -106,7 +106,7 @@ def get_autocor(chainFile="chain.pkl"):
 
     import pickle as pickle
 
-    with open(chainFile) as f:
+    with open(chainFile, "rb") as f:
         chain = pickle.load(f)
 
     import numpy as np
