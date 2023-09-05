@@ -119,7 +119,7 @@ def get_autocor(chainFile="chain.pkl"):
         )
         ac.append(dum)
         autocorr_message = "{0:.2f}".format(dum)
-    #    print(autocorr_message)
+        print(autocorr_message)
     try:
         idx = int(np.max(ac))
     except ValueError:

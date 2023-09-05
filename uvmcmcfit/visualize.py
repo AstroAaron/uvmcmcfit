@@ -17,7 +17,7 @@ To be able to run visualize.convergence() and visualize.bestFit() need a bit of 
 	- in .casa directory create startup.py file (if not there already) and write in it:
 	import site
 	# python
-	site.addsitedir("~/anaconda3/envs/"[your-env]"/lib/python3.9/site-packages")
+	site.addsitedir("/home/"[your-user]"/"[where-you-installed-casa]"/casa-6.2.1-7-pipeline-2021.2.0.128/lib/py/lib/python3.6/site-packages")
 	# python
 	site.addsitedir("/home/"[your-user]"/.local/lib/python3.6/site-packages")
 	# python
@@ -162,7 +162,7 @@ def walker_reconstructed(
     - must be produced for all parameters, not just those of interest
     - if reached stationary: mean and variance of the trace should be relatively constant
 
-    Do not run in CASA
+    Do not run in CASA #can be run in CASA
 
 
     Parameters

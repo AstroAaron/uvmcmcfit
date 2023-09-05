@@ -84,7 +84,7 @@ import os
 import os.path
 import sys
 import time
-from tqdm import tqdm
+#from tqdm import tqdm
 from subprocess import call
 
 import emcee
@@ -96,7 +96,10 @@ from astropy.table import Table
 
 # import pyximport
 # pyximport.install(setup_args={"include_dirs":numpy.get_include()})
-from . import lensutil, sample_vis, setuputil, uvutil
+try:
+	from . import lensutil, sample_vis, setuputil, uvutil #casa cant import this way but we need to import it this way to run mcmcsampling (uvmcmcfit)
+except ImportError or ModuleNotFoundError:
+	import lensutil, sample_vis, setuputil, uvutil
 
 # cwd = os.getcwd()
 # sys.path.append(cwd)
@@ -778,7 +781,7 @@ def main():
 
     valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
 
-    for i in tqdm(range(nsessions)):
+    for i in range(nsessions):
         saveidx = 0
         for pos, prob, state, amp in sampler.sample(
             pos0, iterations=int(niter / nsessions)
@@ -872,5 +875,5 @@ def main():
     if mpi:
         pool.close()
         
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+main()

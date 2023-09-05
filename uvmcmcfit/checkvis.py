@@ -22,7 +22,10 @@ from subprocess import call
 import matplotlib.pyplot as plt
 from pylab import savefig
 
-from . import uvmodel
+try:
+	from . import uvmodel #casa cant import this way but we need to import it this way to run mcmcsampling (uvmcmcfit)
+except ImportError or ModuleNotFoundError:
+	import uvmodel 
 
 
 def iterPlot(simvis, nfigures, color, label):
