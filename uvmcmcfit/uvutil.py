@@ -476,7 +476,7 @@ def statwt(visfileloc, newvisfileloc, ExcludeChannels=False):
     wgt_original = data_wgt.copy()
 
     if ExcludeChannels:
-        nwindows = len(ExcludeChannels) / 2
+        nwindows = len(ExcludeChannels) // 2
         for win in range(0, nwindows * 2, 2):
             chan1 = ExcludeChannels[win]
             chan2 = ExcludeChannels[win + 1]
