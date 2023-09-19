@@ -67,6 +67,10 @@ Similar to uvmcmcfit.py, but here we edited it to
  profiles.
 
  - Sources: Sources are represented by Gaussian profiles.
+ 
+ 4. If you want to run this in CASA (not fully tested) then do as follows:
+ 		- within casa: import uvmcmcfit
+ 		- uvmcmcfit.main()
 
 --------
  OUTPUTS
@@ -754,6 +758,7 @@ def main():
         except ValueError:
             pos0, lnprob0, rstate0, _ = sampler.run_mcmc(pzero, burnin)
         sampler.reset()  # reset chain
+        
     else:
         pos0 = pzero
 
@@ -875,5 +880,5 @@ def main():
     if mpi:
         pool.close()
         
-#if __name__ == "__main__":
-main()
+if __name__ == "__main__":
+	main()
