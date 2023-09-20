@@ -45,7 +45,7 @@ def reconstruct_chain(
     nsteps = len(pdf) // nwalkers
     ndim = len(fitKeys)
     assert isinstance(
-        nsteps, int 
+        nsteps, int
     ), "the total number of samples should be nsteps x nwalkers"
 
     chains = numpy.empty([nwalkers, nsteps, ndim])
@@ -209,8 +209,10 @@ def plotPDF(fitresults, tag, limits="", Ngood=5000, axes="auto"):
                 else:
                     p_l = limits[0]
                     p_u = limits[1]
-                    xmin = p_l[i-1] #bug: IndexError: index 11 is out of bounds for axis 0 with size 11. was p_l[i]. changed to p_l[i-1]
-                    xmax = p_u[i-1]
+                    xmin = p_l[
+                        i - 1
+                    ]  # bug: IndexError: index 11 is out of bounds for axis 0 with size 11. was p_l[i]. changed to p_l[i-1]
+                    xmax = p_u[i - 1]
                 ymin = oldaxis[2]
                 ymax = oldaxis[3]
                 plt.axis([xmin, xmax, ymin, ymax])
@@ -235,13 +237,12 @@ def makeSBmap(config, fitresult):
     import os
     import re
 
-    import lensutil
     import numpy
-    import setuputil
     from astropy.io import fits
 
-    # Loop over each region
+    from . import lensutil, setuputil
 
+    # Loop over each region
     # read the input parameters
     paramData = setuputil.loadParams(config)
 
@@ -407,19 +408,22 @@ def makeVis(config, miriad=False, idtag=""):
 
             # check to see if the CASA ms exists
             try:
-                from casatools import table #changed from "from taskinit import tb"
+                from casatools import table  # changed from "from taskinit import tb"
+
                 tb = table()
 
                 tb.open(visname + tag)
                 tb.close()
                 print("Found an existing CASA ms file.")
-            except RuntimeError: #from RuntimeError
+            except RuntimeError:  # from RuntimeError
                 print(
                     "No CASA ms file found, creating one from "
                     + visname
                     + ".uvfits file."
                 )
-                from casatasks import importuvfits #changed from "#from casatools import importuvfits"
+                from casatasks import (
+                    importuvfits,  # changed from "#from casatools import importuvfits"
+                )
 
                 infile = visname + ".uvfits"
                 outfile = visname + ".ms"
@@ -487,6 +491,7 @@ def makeVis(config, miriad=False, idtag=""):
             # check to see if the CASA ms exists
             try:
                 from casatools import table
+
                 tb = table()
 
                 tb.open(visname + tag)
@@ -745,7 +750,6 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=""):
 
         # ---------------------------------------
         # invert and clean the model visibilities
-
         # remove any existing clean products, except for .mask
         # mask should be re-usable
         imloc = target + "_clean_model"
@@ -780,7 +784,17 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=""):
         # use CASA's clean task to make the images
         print("")
         print("*** CLEANING with the following options: *** \n")
-        print("vis={}, imagename={}, specmode='mfs', niters=10000, threshold={} mJy, interactive={}, mask={}, imsize={},cell={},weighting='briggs',robust=0.0".format(modelvisloc,imloc + ".image",threshold,interactive,mask,imsize,cell))
+        print(
+            "vis={}, imagename={}, specmode='mfs', niters=10000, threshold={} mJy, interactive={}, mask={}, imsize={},cell={},weighting='briggs',robust=0.0".format(
+                modelvisloc,
+                imloc + ".image",
+                threshold,
+                interactive,
+                mask,
+                imsize,
+                cell,
+            )
+        )
 
         tclean(
             vis=modelvisloc,
@@ -793,7 +807,7 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=""):
             imsize=imsize,
             cell=cell,
             weighting="briggs",
-            robust=0.0, #from 0.5
+            robust=0.0,  # from 0.5
         )
 
         # export the cleaned image to a fits file
@@ -1037,7 +1051,10 @@ def plotImage(model, data, config, modeltype, fitresult, tag=""):
     totdx2 = x0 + imradx
     totdy1 = y0 - imrady
     totdy2 = y0 + imrady
-    datacut = im[numpy.int64(totdy1):numpy.int64(totdy2), numpy.int64(totdx1):numpy.int64(totdx2)] #changed from nothing to numpy.int64
+    datacut = im[
+        numpy.int64(totdy1) : numpy.int64(totdy2),
+        numpy.int64(totdx1) : numpy.int64(totdx2),
+    ]  # changed from nothing to numpy.int64
 
     # make cleaned model cutout
     headerkeys = list(headmod.keys())
@@ -1076,7 +1093,10 @@ def plotImage(model, data, config, modeltype, fitresult, tag=""):
     totdx2 = x0 + modradx
     totdy1 = y0 - modrady
     totdy2 = y0 + modrady
-    modelcut = im_model[numpy.int64(totdy1):numpy.int64(totdy2), numpy.int64(totdx1):numpy.int64(totdx2)] #changed from nothing to numpy int64
+    modelcut = im_model[
+        numpy.int64(totdy1) : numpy.int64(totdy2),
+        numpy.int64(totdx1) : numpy.int64(totdx2),
+    ]  # changed from nothing to numpy int64
 
     # cellp = cell * (2 * pixextent + 1.1) / (2 * pixextent)
     xlo = -radialextent
@@ -1323,7 +1343,6 @@ def removeTempFiles():
 
     cmd = "rm -rf *SBmap*fits *_model* *_residual* *output.txt"
     os.system(cmd)
-    
 
 
 def plotFit(

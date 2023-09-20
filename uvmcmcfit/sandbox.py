@@ -8,14 +8,11 @@ Inspect a model with specific parameters defined in config_sandbox.py
 import os
 from subprocess import call
 
-import lensutil
 import numpy
-import sample_vis
-import setuputil
-import uvutil
-import visualutil
 import yaml
 from astropy.io import fits
+
+from . import lensutil, sample_vis, setuputil, uvutil, visualutil
 
 
 def plot(

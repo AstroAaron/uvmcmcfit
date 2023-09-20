@@ -13,7 +13,8 @@ v, and w values as well.
 
 import matplotlib
 import numpy as np
-import uvutil
+
+from . import uvutil
 
 matplotlib.use("Agg")
 import os
@@ -23,9 +24,11 @@ import matplotlib.pyplot as plt
 from pylab import savefig
 
 try:
-	from . import uvmodel #casa cant import this way but we need to import it this way to run mcmcsampling (uvmcmcfit)
+    from . import (
+        uvmodel,  # casa cant import this way but we need to import it this way to run mcmcsampling (uvmcmcfit)
+    )
 except ImportError or ModuleNotFoundError:
-	import uvmodel 
+    import uvmodel
 
 
 def iterPlot(simvis, nfigures, color, label):

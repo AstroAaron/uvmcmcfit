@@ -47,7 +47,7 @@ import pickle as pickle
 import yaml
 from astropy.io import fits
 
-import visualutil
+from . import visualutil
 
 configloc = "config.yaml"
 configfile = open(configloc)
@@ -152,7 +152,8 @@ def convergence(bestfitloc="posteriorpdf.fits"):
 
 
 def walker_reconstructed(
-    bestfitloc="posteriorpdf.fits", chainFile="chain_reconstructed.pkl", converged_idx=0):
+    bestfitloc="posteriorpdf.fits", chainFile="chain_reconstructed.pkl", converged_idx=0
+):
     """
     Plot traces for reconstructed chains. Modifed from Adrian Price-Whelan's code.
     For each parameter, plot at most 10 walkers on left, and a histogram from *all* walkers past converged_idx steps
@@ -193,7 +194,7 @@ def walker_reconstructed(
 
     fitKeys = list(Table.read(bestfitloc).keys())
 
-    with open(chainFile,"rb") as f:
+    with open(chainFile, "rb") as f:
         chain = pickle.load(f)
 
     if converged_idx is None:
@@ -551,7 +552,7 @@ def bestFit(
     showOptical=False,
     cleanup=True,
     interactive=True,
-    threshold=0.0316605762848522*3 ,#old was 1.2
+    threshold=0.0316605762848522 * 3,  # old was 1.2
 ):
     """
 
