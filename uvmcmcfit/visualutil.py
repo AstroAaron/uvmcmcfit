@@ -379,7 +379,7 @@ def makeVis(config, miriad=False, idtag=""):
 
     import os
 
-    import uvmodel
+    from . import uvmodel
 
     # get the uvfits files
     visfile = config["UVData"]
@@ -870,7 +870,7 @@ def plotImage(model, data, config, modeltype, fitresult, tag=""):
     import matplotlib
     import matplotlib.pyplot as plt
     import numpy
-    import setuputil
+    from . import setuputil
     from astropy import wcs
     from matplotlib.patches import Ellipse
     from pylab import savefig
@@ -1443,7 +1443,7 @@ def preProcess(
     import re
 
     import numpy
-    import setuputil
+    from . import setuputil
 
     # Loop over each region
     nlensedsource = paramData["nlensedsource"]
