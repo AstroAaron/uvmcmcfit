@@ -331,7 +331,7 @@ def quality(bestfitloc="posteriorpdf.fits", Ngood=5000, plot=True):
 
     """
 
-    import modifypdf
+    from . import modifypdf
     import numpy as np
     from astropy.io import fits
 
@@ -345,7 +345,7 @@ def quality(bestfitloc="posteriorpdf.fits", Ngood=5000, plot=True):
 
     lnprob_med = np.median(fitresultsgood["lnprob"])
 
-    import uvutil
+    from . import uvutil
 
     visfileloc = config["UVData"]
     data_complex, data_wgt = uvutil.visload(visfileloc)
@@ -379,7 +379,7 @@ def quality(bestfitloc="posteriorpdf.fits", Ngood=5000, plot=True):
         else:
             print(k, v)
 
-    import sandbox
+    from . import sandbox
 
     configFile_avg = "averageParam.yaml"
     import os
@@ -426,7 +426,7 @@ def evolvePDF(bestfitloc="posteriorpdf.fits", stepsize=50000):
 
     """
 
-    import setuputil
+    from . import setuputil
 
     # Get upper and lower limits on the parameters to set the plot limits
     paramData = setuputil.loadParams(config)
@@ -457,7 +457,7 @@ def covariance(bestfitloc="posteriorpdf.fits"):
     """
 
     import matplotlib.pyplot as plt
-    import modifypdf
+    from . import modifypdf
     import numpy
     from astropy.table import Table
     from matplotlib import rc
@@ -618,7 +618,7 @@ def goodFits(
 
     """
 
-    import modifypdf
+    from . import modifypdf
     import numpy
 
     # read the posterior PDFs

@@ -140,7 +140,7 @@ def plotPDF(fitresults, tag, limits="", Ngood=5000, axes="auto"):
     """
 
     import matplotlib.pyplot as plt
-    import modifypdf
+    from . import modifypdf
     import numpy
     from matplotlib import rc
     from pylab import savefig
@@ -585,7 +585,7 @@ def makeImage(config, threshold, interactive=True, miriad=False, idtag=""):
 
     import os
 
-    import miriadutil
+    from . import miriadutil
     from astropy.io import fits
     from casatasks import rmtables
 
