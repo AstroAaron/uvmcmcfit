@@ -24,6 +24,7 @@ setuptools.setup(
         "numpy",
         "pyyaml",
         "tqdm",
+        "plotutils"
     ],
     entry_points={"console_scripts": ["uvmcmcfit=uvmcmcfit.uvmcmcfit:main"]},
 )
