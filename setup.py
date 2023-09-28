@@ -23,8 +23,7 @@ setuptools.setup(
         "matplotlib",
         "numpy",
         "pyyaml",
-        "tqdm",
-        "git+https://github.com/farr/plotutils.git"
+        "tqdm",        
     ],
     dependency_links=[
         'https://github.com/farr/plotutils/tarball/master#egg=plotutils-0.0.1',
