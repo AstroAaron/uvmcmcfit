@@ -24,7 +24,11 @@ setuptools.setup(
         "numpy",
         "pyyaml",
         "tqdm",
-        'plotutils @ git+ssh://git@github.com:farr/plotutils.git' 
+        "plotutils @ git+ssh://git@github.com:farr/plotutils.git" 
     ],
-    entry_points={"console_scripts": ["uvmcmcfit=uvmcmcfit.uvmcmcfit:main"]},
+    entry_points={
+        "console_scripts": [
+            "uvmcmcfit=uvmcmcfit.uvmcmcfit:main"
+        ]
+    },
 )
