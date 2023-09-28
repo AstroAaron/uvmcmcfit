@@ -26,5 +26,7 @@ setuptools.setup(
         "tqdm",
         "git+https://github.com/farr/plotutils.git"
     ],
+    dependency_links=[
+        'https://github.com/farr/plotutils/tarball/master#egg=plotutils-0.0.1',
     entry_points={"console_scripts": ["uvmcmcfit=uvmcmcfit.uvmcmcfit:main"]},
 )
