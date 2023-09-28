@@ -10,7 +10,7 @@ Similar to uvmcmcfit.py, but here we edited it to
     - email ourselves once a certain number of samples have been obtained, and so we can decide whether or not to stop sampling instead of interupting the code
 
 
- Last modified: 2023 Aug 21
+ Last modified: 2023 Sep 21
 
  Note: This is experimental software that is in a very active stage of
  development.  If you are interested in using this for your research, please
@@ -69,8 +69,8 @@ Similar to uvmcmcfit.py, but here we edited it to
  - Sources: Sources are represented by Gaussian profiles.
  
  4. If you want to run this in CASA (not fully tested) then do as follows:
- 		- within casa: import uvmcmcfit
- 		- uvmcmcfit.main()
+ 		- within casa: from uvmcmcfit.uvmcmcfit import main
+ 		- main()
 
 --------
  OUTPUTS
@@ -800,16 +800,16 @@ def main():
     # The saveint number has to be an integer, so choose the nsamples and nwalkers so that niter /nsessions/3 is equal to an integer and larger than 1, otherwise it will not save.
     ####################################################
     nsamples = 1e6
-    niter = int(round(nsamples / nwalkers))
+    niter = int(round(nsamples // nwalkers))
     nsessions = 15  # was 10
-    saveint = niter / nsessions / 3
+    saveint = niter // nsessions // 3
 
     valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
 
     for i in range(nsessions):
         saveidx = 0
         for pos, prob, state, amp in sampler.sample(
-            pos0, iterations=int(niter / nsessions)
+            pos0, iterations=int(niter // nsessions)
         ):
             # using sampler.sample() will have pre-defined 0s in elements (cf. run_mcmc())
             print(currenttime)
@@ -848,7 +848,7 @@ def main():
                 sampler.chain[
                     :, numpy.any(sampler.chain[0, :, :] != 0, axis=1), :
                 ].shape[1]
-                == int(niter / nsessions)
+                == int(niter // nsessions)
             ):
                 print(
                     "Ran {:d} iterations in this session. Saving data".format(
