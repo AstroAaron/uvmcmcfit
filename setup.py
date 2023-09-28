@@ -23,9 +23,9 @@ setuptools.setup(
         "matplotlib",
         "numpy",
         "pyyaml",
-        "tqdm",        
+        "tqdm"        
     ],
     dependency_links=[
-        'https://github.com/farr/plotutils/tarball/master#egg=plotutils-0.0.1',
+        'https://github.com/farr/plotutils/tarball/master#egg=plotutils-0.0.1'],
     entry_points={"console_scripts": ["uvmcmcfit=uvmcmcfit.uvmcmcfit:main"]},
 )
