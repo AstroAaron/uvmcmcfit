@@ -24,7 +24,7 @@ setuptools.setup(
         "numpy",
         "pyyaml",
         "tqdm",
-        "git+https://git@github.com:farr/plotutils.git#egg=plotutils" 
+        "plotutils @ git+https://git@github.com/farr/plotutils.git#egg=plotutils",
     ],
     entry_points={
         "console_scripts": [
