@@ -159,7 +159,7 @@ def plotPDF(fitresults, tag, limits="", Ngood=5000, axes="auto"):
     # determine dimensions of PDF plots
     nparams = len(fitresultsgood[0])
     ncol = 4
-    nrow = (nparams / ncol + 1) if nparams % ncol != 0 else nparams / ncol
+    nrow = (nparams // ncol + 1) if nparams % ncol != 0 else nparams // ncol
 
     plt.figure(figsize=(18.0, 2.0 * nrow))
 
@@ -188,7 +188,7 @@ def plotPDF(fitresults, tag, limits="", Ngood=5000, axes="auto"):
             print(("{:s} = {:.4f} +/- {:.4f}").format(pname, avgval, rmsval))
             avg_dic[pname] = avgval
             totalwidth = frg.max() - frg.min()
-            nbins = totalwidth / rmsval * 5
+            nbins = totalwidth // rmsval * 5
 
             plt.hist(frg, int(nbins), edgecolor="blue")
             plt.ylabel("N")
@@ -196,7 +196,7 @@ def plotPDF(fitresults, tag, limits="", Ngood=5000, axes="auto"):
             if axes == "auto":
                 start, end = ax.get_xlim()
                 nticks = 5
-                stepsize = (end - start) / nticks
+                stepsize = (end - start) // nticks
                 ax.xaxis.set_ticks(numpy.arange(start, end + 0.99 * stepsize, stepsize))
             elif axes == "initial":
                 oldaxis = plt.axis()

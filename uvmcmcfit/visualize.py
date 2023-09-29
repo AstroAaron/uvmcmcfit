@@ -228,7 +228,7 @@ def walker_reconstructed(
 
             totalwidth = these_chains.max() - these_chains.min()
             rms = np.std(these_chains[:, converged_idx:])
-            nbins = totalwidth / rms * 5
+            nbins = totalwidth // rms * 5
             nbins = nbins if nbins > 0 else 10
 
             ax1 = plt.subplot(gs[counter_gs, :2])
