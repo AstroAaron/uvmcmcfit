@@ -552,6 +552,7 @@ def bestFit(
     showOptical=False,
     cleanup=True,
     interactive=True,
+    robust=0.,
     threshold=0.0316605762848522 * 3,  # old was 1.2
 ):
     """
@@ -588,6 +589,7 @@ def bestFit(
         bestfit,
         threshold,
         tag=tag,
+        robust=robust,
         cleanup=cleanup,
         showOptical=showOptical,
         interactive=interactive,
@@ -602,6 +604,7 @@ def goodFits(
     interactive=True,
     showOptical=False,
     threshold=1.2,
+    robust=0.
 ):
     """
 
@@ -645,6 +648,7 @@ def goodFits(
             config,
             fitresult,
             threshold,
+            robust,
             tag=tag,
             showOptical=showOptical,
             cleanup=cleanup,
