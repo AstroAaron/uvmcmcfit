@@ -348,7 +348,7 @@ def uvload(visfile):
         nspw = len(freq[0])
 
         for ispw in range(nspw):
-            ilam = 3e8 / freq[0][ispw]
+            ilam = 3e8 / freq[0][ispw] 
             indx_spw = uvspw == ispw
             uvw[:, indx_spw] /= ilam
 
@@ -359,14 +359,31 @@ def uvload(visfile):
             uu.append(uvw[0, :])
             vv.append(uvw[1, :])
             ww.append(uvw[2, :])
+            
         uu = numpy.array(uu)
         vv = numpy.array(vv)
         ww = numpy.array(ww)
+        
         if uu[:, 0].size == 1:
             uu = uu.flatten()
             vv = vv.flatten()
             ww = ww.flatten()
+            
+        tb.open(visfile)
+        vis_weight = tb.getcol("WEIGHT")
+        tb.close()
+            
+        data_wgt = vis_weight        #added this part from Visload: Problem is that there is an index mismatch from uuu[positive_definite], where positive_definite has shape (2,1,nrow) and uuu has (2,nrow) and needs the place holder for the middle index.
+        wgtshape = data_wgt.shape #
+        if len(wgtshape) == 2: #
+            npol = wgtshape[0] #
+            nrow = wgtshape[1] #
+            wgtshape = (npol, 1, nrow) #
 
+        uu = uu.reshape(wgtshape) #
+        vv = vv.reshape(wgtshape) #
+        ww = ww.reshape(wgtshape) #
+        
     return uu, vv, ww
 
 
@@ -430,7 +447,7 @@ def visload(visfile):
             nrow = wgtshape[1]
             wgtshape = (npol, 1, nrow)
 
-        data_wgt = data_wgt.reshape(wgtshape)
+        data_wgt = data_wgt.reshape(wgtshape) 
         # data_complex = []
         # data_wgt = []
         # for ipol in range(npol):
