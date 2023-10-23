@@ -570,7 +570,7 @@ def makeVis(config, miriad=False, idtag=""):
         #    raise TypeError
 
 
-def makeImage(config, threshold, interactive=True, robust, miriad=False, idtag=""):
+def makeImage(config, threshold, robust,interactive=True,  miriad=False, idtag=""):
     """
 
     Make an image of the model and the residual from simulated model
