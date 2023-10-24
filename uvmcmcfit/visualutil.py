@@ -779,17 +779,19 @@ def makeImage(config, threshold, robust,interactive=True,  miriad=False, idtag="
             mask = maskname
         else:
             mask = ""
+        usemask="user"
 
         threshold = str(threshold)
         # use CASA's clean task to make the images
         print("")
         print("*** CLEANING with the following options: *** \n")
         print(
-            "vis={}, imagename={}, specmode='mfs', niters=10000, threshold={} mJy, interactive={}, mask={}, imsize={},cell={},weighting='briggs',robust=0.0".format(
+            "vis={}, imagename={}, specmode='mfs', niters=10000, threshold={} mJy, interactive={},usemask={}, mask={}, imsize={},cell={},weighting='briggs',robust=0.0".format(
                 modelvisloc,
                 imloc + ".image",
                 threshold,
                 interactive,
+                usemask,
                 mask,
                 imsize,
                 cell,
@@ -803,6 +805,7 @@ def makeImage(config, threshold, robust,interactive=True,  miriad=False, idtag="
             niter=10000,
             threshold=threshold + "mJy",
             interactive=interactive,
+            usemask="user",
             mask=mask,
             imsize=imsize,
             cell=cell,
@@ -842,6 +845,7 @@ def makeImage(config, threshold, robust,interactive=True,  miriad=False, idtag="
             niter=10000,
             threshold=threshold + "mJy",
             interactive=interactive,
+            usemask="user",
             mask=mask,
             imsize=imsize,
             cell=cell,
