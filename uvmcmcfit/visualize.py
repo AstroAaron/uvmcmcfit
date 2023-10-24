@@ -552,6 +552,7 @@ def bestFit(
     showOptical=False,
     cleanup=True,
     interactive=True,
+    weighting="briggs",
     robust=0.,
     threshold=0.0316605762848522 * 3,  # old was 1.2
 ):
@@ -566,6 +567,10 @@ def bestFit(
     ----------
     threshold: float
         in mJy, cleaning threshold
+    robust: float
+	briggs cleaning parameter
+    weighting:
+	form of weighting applied for tclean.
 
     """
 
@@ -587,7 +592,8 @@ def bestFit(
     visualutil.plotFit(
         config,
         bestfit,
-        threshold,
+        threshold=threshold,
+	weighting=weighting,
         tag=tag,
         robust=robust,
         cleanup=cleanup,
@@ -604,7 +610,8 @@ def goodFits(
     interactive=True,
     showOptical=False,
     threshold=1.2,
-    robust=0.
+    robust=0.,
+    weighting="briggs"
 ):
     """
 
@@ -647,8 +654,9 @@ def goodFits(
         visualutil.plotFit(
             config,
             fitresult,
-            threshold,
-            robust,
+            threshold=threshold,
+            robust=robust,
+	    weighting=weighting,
             tag=tag,
             showOptical=showOptical,
             cleanup=cleanup,

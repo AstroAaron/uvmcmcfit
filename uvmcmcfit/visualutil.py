@@ -570,7 +570,7 @@ def makeVis(config, miriad=False, idtag=""):
         #    raise TypeError
 
 
-def makeImage(config, threshold, robust,interactive=True,  miriad=False, idtag=""):
+def makeImage(config, threshold,weighting="briggs", robust=0.,interactive=True,  miriad=False, idtag=""):
     """
 
     Make an image of the model and the residual from simulated model
@@ -779,22 +779,24 @@ def makeImage(config, threshold, robust,interactive=True,  miriad=False, idtag="
             mask = maskname
         else:
             mask = ""
-        usemask="user"
+	usemask="user"
 
         threshold = str(threshold)
         # use CASA's clean task to make the images
         print("")
         print("*** CLEANING with the following options: *** \n")
         print(
-            "vis={}, imagename={}, specmode='mfs', niters=10000, threshold={} mJy, interactive={},usemask={}, mask={}, imsize={},cell={},weighting='briggs',robust=0.0".format(
+            "vis={}, imagename={}, specmode='mfs', niters=10000, threshold={} mJy, interactive={}, mask={},usemask={}, imsize={},cell={},weighting={},robust={}".format(
                 modelvisloc,
                 imloc + ".image",
                 threshold,
                 interactive,
-                usemask,
                 mask,
+		usemask,
                 imsize,
                 cell,
+		weighting,
+		robust
             )
         )
 
@@ -805,12 +807,12 @@ def makeImage(config, threshold, robust,interactive=True,  miriad=False, idtag="
             niter=10000,
             threshold=threshold + "mJy",
             interactive=interactive,
-            usemask="user",
+	    usemask,
             mask=mask,
             imsize=imsize,
             cell=cell,
-            weighting="briggs",
-            robust=0.0,  # from 0.5
+            weighting=weighting,
+            robust=robust,  # from 0.5
         )
 
         # export the cleaned image to a fits file
@@ -845,12 +847,12 @@ def makeImage(config, threshold, robust,interactive=True,  miriad=False, idtag="
             niter=10000,
             threshold=threshold + "mJy",
             interactive=interactive,
-            usemask="user",
+	    usemask,
             mask=mask,
             imsize=imsize,
             cell=cell,
-            weighting="briggs",
-            robust=0.0,
+            weighting=weighting,
+            robust=robust,
         )
 
         # export the cleaned image to a fits file
@@ -1353,6 +1355,8 @@ def plotFit(
     config,
     fitresult,
     threshold,
+    robust,
+    weighting,
     tag="",
     cleanup=True,
     showOptical=False,
@@ -1391,7 +1395,7 @@ def plotFit(
     makeVis(config, miriad=miriad, idtag=tag)
 
     # image the simulated visibilities
-    makeImage(config, threshold, miriad=miriad, interactive=interactive, idtag=tag)
+    makeImage(config, threshold,weighting,robust, miriad=miriad, interactive=interactive, idtag=tag)
 
     # read in the images of the simulated visibilities
     objectname = config["ObjectName"]
