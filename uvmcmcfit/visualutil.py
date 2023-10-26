@@ -779,7 +779,7 @@ def makeImage(config, threshold,weighting="briggs", robust=0.,interactive=True, 
             mask = maskname
         else:
             mask = ""
-	usemask="user"
+        usemask="user"
 
         threshold = str(threshold)
         # use CASA's clean task to make the images
@@ -792,11 +792,11 @@ def makeImage(config, threshold,weighting="briggs", robust=0.,interactive=True, 
                 threshold,
                 interactive,
                 mask,
-		usemask,
+                usemask,
                 imsize,
                 cell,
-		weighting,
-		robust
+                weighting,
+                robust
             )
         )
 
@@ -807,7 +807,7 @@ def makeImage(config, threshold,weighting="briggs", robust=0.,interactive=True, 
             niter=10000,
             threshold=threshold + "mJy",
             interactive=interactive,
-	    usemask,
+            usemask=usemask,
             mask=mask,
             imsize=imsize,
             cell=cell,
@@ -847,7 +847,7 @@ def makeImage(config, threshold,weighting="briggs", robust=0.,interactive=True, 
             niter=10000,
             threshold=threshold + "mJy",
             interactive=interactive,
-	    usemask,
+            usemask=usemask,
             mask=mask,
             imsize=imsize,
             cell=cell,
