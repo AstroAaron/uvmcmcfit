@@ -44,7 +44,7 @@ def pcdload(visfile):
 
     else:
         # CASA MS
-        pcd = MSpcd(visfile)
+        pcd = MSpcd(visfile) 
         return pcd
 
 
@@ -749,7 +749,7 @@ def getFreqfromtb(msFile):
     return freq0
 
 
-def checkMS(msFile, cont=True):
+def checkMS(msFile, cont=True): 
     """get the number of spw and channels in the measurement set
     for continuum: combine into 1 channel and spw before running uvmcmcfit
 
@@ -766,14 +766,12 @@ def checkMS(msFile, cont=True):
         number of channels
 
     """
-    from casatools import ms
-
-    ms.open(msFile)
-    metadata = ms.metadata()
-    ms.done()
-    nspw = metadata.nspw()
-    for i in range(nspw):
+    from casatools import msmetadata #fixed to be usable again. Used import ms before which lead to erros. 
+    msmd = msmetadata()
+    msmd.open(msFile)
+    nspw = msmd.nspw()
+    for i in range(nspw): 
         # number of channels in each spw
-        nchan = metadata.nchan(spw)
-    metadata.done()
+        nchan = msmd.nchan(i)
+    msmd.done()
     return nspw, nchan
