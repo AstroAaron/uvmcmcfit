@@ -196,7 +196,7 @@ def plotPDF(fitresults, tag, limits="", Ngood=5000, axes="auto"):
             if axes == "auto":
                 start, end = ax.get_xlim()
                 nticks = 5
-                stepsize = (end - start) // nticks
+                stepsize = (end - start) / nticks
                 ax.xaxis.set_ticks(numpy.arange(start, end + 0.99 * stepsize, stepsize))
             elif axes == "initial":
                 oldaxis = plt.axis()
